@@ -6,4 +6,4 @@
 [![codecov](https://codecov.io/gh/metal-pod/security/branch/master/graph/badge.svg)](https://codecov.io/gh/metal-pod/security)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/metal-pod/security/blob/master/LICENSE)
 
-JWT and HMAC based security primitives for authentication of services and users
+JWT and HMAC based security primitives for authentication of services and users.
