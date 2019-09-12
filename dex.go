@@ -144,10 +144,18 @@ func (dx *Dex) User(rq *http.Request) (*User, error) {
 		for _, g := range claims.Groups {
 			grps = append(grps, RessourceAccess(g))
 		}
+		tenant := ""
+		if claims.FederatedClaims != nil {
+			cid := claims.FederatedClaims["connector_id"]
+			if cid != "" {
+				tenant = strings.Split(cid, "_")[0]
+			}
+		}
 		usr := User{
 			Name:   claims.Name,
 			EMail:  claims.EMail,
 			Groups: grps,
+			Tenant: tenant,
 		}
 		return &usr, nil
 	}
