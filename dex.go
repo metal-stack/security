@@ -24,6 +24,8 @@ type Dex struct {
 	keys            chan<- keyRQ
 	update          chan updater
 	refreshInterval time.Duration
+
+	userConverter UserConverterFn
 }
 
 type keyRsp struct {
@@ -39,11 +41,35 @@ func NewDex(baseurl string) (*Dex, error) {
 	dx := &Dex{
 		baseURL:         baseurl,
 		refreshInterval: refetchInterval,
+		// default converter does nothing
+		userConverter: func(u *User) *User {
+			return u
+		},
 	}
 	if err := dx.keyfetcher(); err != nil {
 		return nil, err
 	}
 	return dx, nil
+}
+
+// options for dex
+type Option func(dex *Dex) *Dex
+
+func (dx *Dex) With(opts ...Option) *Dex {
+	for _, opt := range opts {
+		opt(dx)
+	}
+	return dx
+}
+
+// func for user conversion
+type UserConverterFn func(u *User) *User
+
+func UserConverter(fn UserConverterFn) Option {
+	return func(dex *Dex) *Dex {
+		dex.userConverter = fn
+		return dex
+	}
 }
 
 // the keyfetcher fetches the keys from the remote dex at a regular interval.
@@ -157,7 +183,8 @@ func (dx *Dex) User(rq *http.Request) (*User, error) {
 			Groups: grps,
 			Tenant: tenant,
 		}
-		return &usr, nil
+
+		return dx.userConverter(&usr), nil
 	}
 	return nil, fmt.Errorf("invalid claims")
 }
