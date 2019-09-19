@@ -1,6 +1,8 @@
 package security
 
 import (
+	"github.com/stretchr/testify/require"
+	"strings"
 	"testing"
 
 	"net/http"
@@ -165,6 +167,82 @@ func TestDex_User(t *testing.T) {
 			if usr.Tenant != "tenant" {
 				t.Errorf("tenant is %q, but should be 'tenant'", usr.Tenant)
 			}
+		})
+	}
+}
+
+func TestDex_UserWithOptions(t *testing.T) {
+	test := []struct {
+		name string
+		t    time.Time
+		err  string
+	}{
+		{
+			name: "correct bearer",
+			t:    time.Date(2019, time.May, 9, 6, 7, 0, 0, time.UTC),
+		},
+		{
+			name: "token used before issued",
+			t:    time.Date(2019, time.May, 9, 6, 6, 0, 0, time.UTC),
+			err:  "Token used before issued",
+		},
+		{
+			name: "token is expired",
+			t:    time.Date(2019, time.May, 10, 6, 6, 0, 0, time.UTC),
+			err:  "token is expired by 15h59m21s",
+		},
+	}
+	for _, tt := range test {
+		t.Run(tt.name, func(t *testing.T) {
+			jwt.TimeFunc = func() time.Time {
+				return tt.t
+			}
+
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, rq *http.Request) {
+				json.NewEncoder(w).Encode(secondkeydata)
+			}))
+
+			dx, err := NewDex(srv.URL)
+			if err != nil {
+				t.Errorf("NewDex() error = %v", err)
+				return
+			}
+
+			// Name to Akim and Group De-Prefixer Converter - just for this test
+			dx.With(UserConverter(func(u *User) *User {
+
+				result := &User{}
+				result.Name = "akim"
+				result.Tenant = u.Tenant
+				result.EMail = u.EMail
+				for i := range u.Groups {
+					grp := string(u.Groups[i])
+					result.Groups = append(result.Groups, RessourceAccess(strings.TrimPrefix(grp, "k8s_")))
+				}
+				return result
+			}))
+
+			rq := httptest.NewRequest(http.MethodGet, srv.URL, nil)
+			rq.Header.Add("Authorization", "Bearer "+authtoken)
+			usr, err := dx.User(rq)
+			if err != nil {
+				if tt.err != "" && tt.err == err.Error() {
+					return
+				}
+				t.Errorf("got error '%v' but expected %q", err, tt.err)
+				return
+			}
+			if usr.Name != "akim" {
+				t.Errorf("username is %q, but should be 'akim'", usr.Name)
+			}
+			if usr.Tenant != "tenant" {
+				t.Errorf("tenant is %q, but should be 'tenant'", usr.Tenant)
+			}
+
+			require.Contains(t, usr.Groups, RessourceAccess("kaas-view"))
+			require.Contains(t, usr.Groups, RessourceAccess("development__cluster-admin"))
+			require.Contains(t, usr.Groups, RessourceAccess("production__cluster-admin"))
+			require.Contains(t, usr.Groups, RessourceAccess("staging__cluster-admin"))
 		})
 	}
 }
