@@ -208,18 +208,26 @@ func TestDex_UserWithOptions(t *testing.T) {
 				return
 			}
 
-			// Name to Akim and Group De-Prefixer Converter - just for this test
-			dx.With(UserConverter(func(u *User) *User {
-
-				result := &User{}
-				result.Name = "akim"
-				result.Tenant = u.Tenant
-				result.EMail = u.EMail
-				for i := range u.Groups {
-					grp := string(u.Groups[i])
-					result.Groups = append(result.Groups, RessourceAccess(strings.TrimPrefix(grp, "k8s_")))
+			// change Name to akim and de-prefix groups - just for this test
+			dx.With(UserExtractor(func(claims *Claims) (user *User, e error) {
+				var grps []RessourceAccess
+				for _, g := range claims.Groups {
+					grps = append(grps, RessourceAccess(strings.TrimPrefix(g, "k8s_")))
 				}
-				return result
+				tenant := ""
+				if claims.FederatedClaims != nil {
+					cid := claims.FederatedClaims["connector_id"]
+					if cid != "" {
+						tenant = strings.Split(cid, "_")[0]
+					}
+				}
+				usr := User{
+					Name:   "akim",
+					EMail:  claims.EMail,
+					Groups: grps,
+					Tenant: tenant,
+				}
+				return &usr, nil
 			}))
 
 			rq := httptest.NewRequest(http.MethodGet, srv.URL, nil)

@@ -42,7 +42,7 @@ func (ra accessGroup) asSet() ressourceSet {
 
 // We overwrite the Audience because in the current version of the jwt library this
 // is not an array.
-type access struct {
+type Claims struct {
 	jwt.StandardClaims
 	Audience        interface{}       `json:"aud,omitempty"`
 	Groups          []string          `json:"groups"`
