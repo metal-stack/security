@@ -25,7 +25,7 @@ type Dex struct {
 	update          chan updater
 	refreshInterval time.Duration
 
-	userConverter UserConverterFn
+	userExtractor UserExtractorFn
 }
 
 type keyRsp struct {
@@ -41,10 +41,7 @@ func NewDex(baseurl string) (*Dex, error) {
 	dx := &Dex{
 		baseURL:         baseurl,
 		refreshInterval: refetchInterval,
-		// default converter does nothing
-		userConverter: func(u *User) *User {
-			return u
-		},
+		userExtractor:   defaultUserExtractor,
 	}
 	if err := dx.keyfetcher(); err != nil {
 		return nil, err
@@ -52,9 +49,10 @@ func NewDex(baseurl string) (*Dex, error) {
 	return dx, nil
 }
 
-// options for dex
+// Option configures Dex
 type Option func(dex *Dex) *Dex
 
+// With sets available Options
 func (dx *Dex) With(opts ...Option) *Dex {
 	for _, opt := range opts {
 		opt(dx)
@@ -62,12 +60,12 @@ func (dx *Dex) With(opts ...Option) *Dex {
 	return dx
 }
 
-// func for user conversion
-type UserConverterFn func(u *User) *User
+// UserExtractorFn extracts the User and Claims
+type UserExtractorFn func(claims *Claims) (*User, error)
 
-func UserConverter(fn UserConverterFn) Option {
+func UserExtractor(fn UserExtractorFn) Option {
 	return func(dex *Dex) *Dex {
-		dex.userConverter = fn
+		dex.userExtractor = fn
 		return dex
 	}
 }
@@ -156,35 +154,38 @@ func (dx *Dex) User(rq *http.Request) (*User, error) {
 		// no Bearer token
 		return nil, errNoAuthFound
 	}
-	btoken := strings.TrimSpace(splitToken[1])
-	token, err := jwt.ParseWithClaims(btoken, &access{}, func(token *jwt.Token) (interface{}, error) {
+	bearerToken := strings.TrimSpace(splitToken[1])
+
+	token, err := jwt.ParseWithClaims(bearerToken, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		kid := token.Header["kid"].(string)
 		return dx.searchKey(kid)
 	})
-
 	if err != nil {
 		return nil, err
 	}
-	if claims, ok := token.Claims.(*access); ok && token.Valid {
-		var grps []RessourceAccess
-		for _, g := range claims.Groups {
-			grps = append(grps, RessourceAccess(g))
-		}
-		tenant := ""
-		if claims.FederatedClaims != nil {
-			cid := claims.FederatedClaims["connector_id"]
-			if cid != "" {
-				tenant = strings.Split(cid, "_")[0]
-			}
-		}
-		usr := User{
-			Name:   claims.Name,
-			EMail:  claims.EMail,
-			Groups: grps,
-			Tenant: tenant,
-		}
-
-		return dx.userConverter(&usr), nil
+	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+		return dx.userExtractor(claims)
 	}
 	return nil, fmt.Errorf("invalid claims")
+}
+
+func defaultUserExtractor(claims *Claims) (*User, error) {
+	var grps []RessourceAccess
+	for _, g := range claims.Groups {
+		grps = append(grps, RessourceAccess(g))
+	}
+	tenant := ""
+	if claims.FederatedClaims != nil {
+		cid := claims.FederatedClaims["connector_id"]
+		if cid != "" {
+			tenant = strings.Split(cid, "_")[0]
+		}
+	}
+	usr := User{
+		Name:   claims.Name,
+		EMail:  claims.EMail,
+		Groups: grps,
+		Tenant: tenant,
+	}
+	return &usr, nil
 }
