@@ -181,7 +181,7 @@ func TestHMACAuth_User(t *testing.T) {
 				rq.Header.Add("Authorization", st.auth)
 			}
 			if st.ts != "" {
-				rq.Header.Set(tsHeader, st.ts)
+				rq.Header.Set(TsHeaderKey, st.ts)
 			}
 			_, err := hm.User(rq)
 			if st.errcheck != nil {
