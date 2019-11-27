@@ -195,7 +195,7 @@ func (s cryptoSource) Int63() int64 {
 func (s cryptoSource) Uint64() (v uint64) {
 	err := binary.Read(crand.Reader, binary.BigEndian, &v)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("crypto/rand is unavailable, read failed with: %v", err))
 	}
 	return v
 }
