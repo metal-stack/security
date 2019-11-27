@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -275,4 +276,9 @@ func TestMacCalc2(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_randomByteString(t *testing.T) {
+	// make sure that we dont rely on pseudo-random-numbers
+	require.NotEqual(t, "XVlBzgbaiCMRAjWwhTHctcuA", string(randomByteString(24)))
 }

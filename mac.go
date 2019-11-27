@@ -2,7 +2,9 @@ package security
 
 import (
 	"crypto/hmac"
+	crand "crypto/rand"
 	"crypto/sha256"
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"math/rand"
@@ -164,12 +166,36 @@ func (hma *HMACAuth) getData(rq *http.Request) [][]byte {
 	}
 }
 
+// replaceable function to create a random byte string
+var randByteString = randomByteString
+
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-var randByteString = func(n int) []byte {
+func randomByteString(n int) []byte {
 	b := make([]byte, n)
 	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+		b[i] = letterBytes[secureRand.Intn(len(letterBytes))]
 	}
 	return b
+}
+
+// create a math/random with a secure source to get real random numbers
+var secureRand = rand.New(src)
+var src cryptoSource
+
+type cryptoSource struct{}
+
+func (s cryptoSource) Seed(seed int64) {
+	// crypto/rand does not need a seed
+}
+func (s cryptoSource) Int63() int64 {
+	return int64(s.Uint64() & ^uint64(1<<63))
+}
+
+func (s cryptoSource) Uint64() (v uint64) {
+	err := binary.Read(crand.Reader, binary.BigEndian, &v)
+	if err != nil {
+		panic(fmt.Sprintf("crypto/rand is unavailable, read failed with: %v", err))
+	}
+	return v
 }
