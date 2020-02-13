@@ -6,18 +6,18 @@ func TestUser_HasGroup(t *testing.T) {
 	type fields struct {
 		EMail  string
 		Name   string
-		Groups []RessourceAccess
+		Groups []ResourceAccess
 	}
 	type args struct {
-		grps []RessourceAccess
+		grps []ResourceAccess
 	}
 	inputfield := fields{
 		EMail: "blubber",
 		Name:  "blabber",
-		Groups: []RessourceAccess{
-			RessourceAccess("a"),
-			RessourceAccess("b"),
-			RessourceAccess("c"),
+		Groups: []ResourceAccess{
+			ResourceAccess("a"),
+			ResourceAccess("b"),
+			ResourceAccess("c"),
 		},
 	}
 	tests := []struct {
@@ -30,10 +30,10 @@ func TestUser_HasGroup(t *testing.T) {
 			name:   "no group in groups",
 			fields: inputfield,
 			args: args{
-				grps: []RessourceAccess{
-					RessourceAccess("1"),
-					RessourceAccess("2"),
-					RessourceAccess("3"),
+				grps: []ResourceAccess{
+					ResourceAccess("1"),
+					ResourceAccess("2"),
+					ResourceAccess("3"),
 				},
 			},
 			want: false,
@@ -42,10 +42,10 @@ func TestUser_HasGroup(t *testing.T) {
 			name:   "one group in groups",
 			fields: inputfield,
 			args: args{
-				grps: []RessourceAccess{
-					RessourceAccess("1"),
-					RessourceAccess("a"),
-					RessourceAccess("3"),
+				grps: []ResourceAccess{
+					ResourceAccess("1"),
+					ResourceAccess("a"),
+					ResourceAccess("3"),
 				},
 			},
 			want: true,
@@ -54,10 +54,10 @@ func TestUser_HasGroup(t *testing.T) {
 			name:   "multiple groups in groups",
 			fields: inputfield,
 			args: args{
-				grps: []RessourceAccess{
-					RessourceAccess("1"),
-					RessourceAccess("a"),
-					RessourceAccess("b"),
+				grps: []ResourceAccess{
+					ResourceAccess("1"),
+					ResourceAccess("a"),
+					ResourceAccess("b"),
 				},
 			},
 			want: true,

@@ -170,9 +170,9 @@ func (dx *Dex) User(rq *http.Request) (*User, error) {
 }
 
 func defaultUserExtractor(claims *Claims) (*User, error) {
-	var grps []RessourceAccess
+	var grps []ResourceAccess
 	for _, g := range claims.Groups {
-		grps = append(grps, RessourceAccess(g))
+		grps = append(grps, ResourceAccess(g))
 	}
 	tenant := ""
 	if claims.FederatedClaims != nil {

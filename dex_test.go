@@ -210,9 +210,9 @@ func TestDex_UserWithOptions(t *testing.T) {
 
 			// change Name to akim and de-prefix groups - just for this test
 			dx.With(UserExtractor(func(claims *Claims) (user *User, e error) {
-				var grps []RessourceAccess
+				var grps []ResourceAccess
 				for _, g := range claims.Groups {
-					grps = append(grps, RessourceAccess(strings.TrimPrefix(g, "k8s_")))
+					grps = append(grps, ResourceAccess(strings.TrimPrefix(g, "k8s_")))
 				}
 				tenant := ""
 				if claims.FederatedClaims != nil {
@@ -247,10 +247,10 @@ func TestDex_UserWithOptions(t *testing.T) {
 				t.Errorf("tenant is %q, but should be 'tenant'", usr.Tenant)
 			}
 
-			require.Contains(t, usr.Groups, RessourceAccess("kaas-view"))
-			require.Contains(t, usr.Groups, RessourceAccess("development__cluster-admin"))
-			require.Contains(t, usr.Groups, RessourceAccess("production__cluster-admin"))
-			require.Contains(t, usr.Groups, RessourceAccess("staging__cluster-admin"))
+			require.Contains(t, usr.Groups, ResourceAccess("kaas-view"))
+			require.Contains(t, usr.Groups, ResourceAccess("development__cluster-admin"))
+			require.Contains(t, usr.Groups, ResourceAccess("production__cluster-admin"))
+			require.Contains(t, usr.Groups, ResourceAccess("staging__cluster-admin"))
 		})
 	}
 }

@@ -13,27 +13,27 @@ import (
 type User struct {
 	EMail  string
 	Name   string
-	Groups []RessourceAccess
+	Groups []ResourceAccess
 	Tenant string
 }
 
 var (
 	guest = User{
-		EMail:  "anonymous@fi-ts.io",
+		EMail:  "anonymous@metal-stack.io",
 		Name:   "anonymous",
-		Groups: []RessourceAccess{},
+		Groups: []ResourceAccess{},
 	}
 	errNoAuthFound = fmt.Errorf("no auth found")
 )
 
-// RessourceAccess is the type for our groups
-type RessourceAccess string
+// ResourceAccess is the type for our groups
+type ResourceAccess string
 
-type accessGroup []RessourceAccess
-type ressourceSet map[RessourceAccess]bool
+type accessGroup []ResourceAccess
+type resourceSet map[ResourceAccess]bool
 
-func (ra accessGroup) asSet() ressourceSet {
-	groupset := make(ressourceSet)
+func (ra accessGroup) asSet() resourceSet {
+	groupset := make(resourceSet)
 	for _, g := range ra {
 		groupset[g] = true
 	}
@@ -52,7 +52,7 @@ type Claims struct {
 }
 
 // HasGroup returns true if the user has at least one of the given groups.
-func (u *User) HasGroup(grps ...RessourceAccess) bool {
+func (u *User) HasGroup(grps ...ResourceAccess) bool {
 	acc := accessGroup(u.Groups).asSet()
 	for _, grp := range grps {
 		if ok := acc[grp]; ok {
