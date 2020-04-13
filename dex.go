@@ -63,6 +63,7 @@ func (dx *Dex) With(opts ...Option) *Dex {
 // UserExtractorFn extracts the User and Claims
 type UserExtractorFn func(claims *Claims) (*User, error)
 
+// UserExtractor extracts the user with the given extractorfunc
 func UserExtractor(fn UserExtractorFn) Option {
 	return func(dex *Dex) *Dex {
 		dex.userExtractor = fn
@@ -76,18 +77,19 @@ func (dx *Dex) keyfetcher() error {
 	c := make(chan keyRQ)
 	dx.keys = c
 	dx.update = make(chan updater)
-	t := time.Tick(dx.refreshInterval)
 	keys, err := jwk.Fetch(dx.baseURL + "/keys")
 	if err != nil {
 		return fmt.Errorf("cannot fetch dex keys from %s/keys: %v", dx.baseURL, err)
 	}
+	t := time.NewTicker(dx.refreshInterval)
 	go func() {
 		defer close(c)
+		defer t.Stop()
 		for {
 			select {
 			case keyRQ := <-c:
 				keyRQ.rsp <- keyRsp{keys, err}
-			case <-t:
+			case <-t.C:
 				keys, err = dx.updateKeys(keys, fmt.Sprintf("Timer: %s", dx.refreshInterval))
 			case u := <-dx.update:
 				keys, err = dx.updateKeys(keys, "forced update")

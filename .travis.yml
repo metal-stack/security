@@ -4,7 +4,7 @@ language: go
 
 # go versions to test
 go:
-  - "1.12.x"
+  - "1.13.x"
 
 # run tests with coverage
 script:

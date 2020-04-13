@@ -1,9 +1,10 @@
 package security
 
 import (
-	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"net/http"
 	"net/http/httptest"
@@ -66,9 +67,15 @@ func TestDex_keyfetcher(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, rq *http.Request) {
 		w.Header().Add("content-type", "application/json")
 		if second {
-			json.NewEncoder(w).Encode(secondkeydata)
+			err := json.NewEncoder(w).Encode(secondkeydata)
+			if err != nil {
+				t.Error(err)
+			}
 		} else {
-			json.NewEncoder(w).Encode(firstkeydata)
+			err := json.NewEncoder(w).Encode(firstkeydata)
+			if err != nil {
+				t.Error(err)
+			}
 		}
 		keysfetched = true
 		second = !second
@@ -143,7 +150,10 @@ func TestDex_User(t *testing.T) {
 			}
 
 			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, rq *http.Request) {
-				json.NewEncoder(w).Encode(secondkeydata)
+				err := json.NewEncoder(w).Encode(secondkeydata)
+				if err != nil {
+					t.Error(err)
+				}
 			}))
 
 			dx, err := NewDex(srv.URL)
@@ -199,7 +209,10 @@ func TestDex_UserWithOptions(t *testing.T) {
 			}
 
 			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, rq *http.Request) {
-				json.NewEncoder(w).Encode(secondkeydata)
+				err := json.NewEncoder(w).Encode(secondkeydata)
+				if err != nil {
+					t.Error(err)
+				}
 			}))
 
 			dx, err := NewDex(srv.URL)
