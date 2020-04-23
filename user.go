@@ -40,7 +40,7 @@ func (ra accessGroup) asSet() resourceSet {
 	return groupset
 }
 
-// We overwrite the Audience because in the current version of the jwt library this
+// Claims we overwrite the Audience because in the current version of the jwt library this
 // is not an array.
 type Claims struct {
 	jwt.StandardClaims
@@ -133,6 +133,8 @@ func AddUserToken(rq *http.Request, token string) {
 
 // AddUserTokenToClientRequest to support openapi
 func AddUserTokenToClientRequest(rq runtime.ClientRequest, token string) {
+	// FIXME add errcheck
+	//nolint:errcheck
 	rq.SetHeaderParam("Authorization", "Bearer "+token)
 }
 

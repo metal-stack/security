@@ -90,6 +90,8 @@ func WithLifetime(max time.Duration) HMACAuthOption {
 func (hma *HMACAuth) createMac(vals ...[]byte) string {
 	h := hmac.New(sha256.New, hma.key)
 	for _, v := range vals {
+		// FIXME add errcheck
+		//nolint:errcheck
 		h.Write(v)
 	}
 	sha := hex.EncodeToString(h.Sum(nil))
@@ -117,6 +119,8 @@ func (hma *HMACAuth) AddAuth(rq *http.Request, t time.Time, body []byte) {
 func (hma *HMACAuth) AddAuthToClientRequest(rq runtime.ClientRequest, t time.Time) {
 	headers := hma.AuthHeaders(rq.GetMethod(), t)
 	for k, v := range headers {
+		// FIXME add errcheck
+		//nolint:errcheck
 		rq.SetHeaderParam(k, v)
 	}
 }
@@ -134,14 +138,21 @@ func (hma *HMACAuth) AuthHeaders(method string, t time.Time) map[string]string {
 	return headers
 }
 
+// RequestData wraps the http request data
 type RequestData struct {
 	Method          string
 	AuthzHeader     string
 	TimestampHeader string
 	SaltHeader      string
 }
+
+// RequestDataGetter is a supplied func which returns the RequestData
 type RequestDataGetter func() RequestData
 
+// User calculates the hmac from header values. The input-values for the calculation
+// are: Date-Header, Request-Method, Request-Content.
+// If the result does not match the HMAC in the header, this function returns an error. Otherwise
+// it returns the user which is connected to this hmac-auth.
 func (hma *HMACAuth) User(rq *http.Request) (*User, error) {
 
 	rqd := RequestData{
@@ -154,7 +165,7 @@ func (hma *HMACAuth) User(rq *http.Request) (*User, error) {
 	return hma.UserFromRequestData(rqd)
 }
 
-// User calculates the hmac from header values. The input-values for the calculation
+// UserFromRequestData calculates the hmac from header values. The input-values for the calculation
 // are: Date-Header, Request-Method, Request-Content.
 // If the result does not match the HMAC in the header, this function returns an error. Otherwise
 // it returns the user which is connected to this hmac-auth.
