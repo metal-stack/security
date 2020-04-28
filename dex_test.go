@@ -17,14 +17,19 @@ import (
 )
 
 var (
-	authtoken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ2NDEyOGM5LWVlYzctNGIyZC1iZTU2LTY0NGU1NGExNWZjYyJ9.eyJhdWQiOlsidG9rZW4tZm9yZ2UiLCJhdXRoLWdvLWNsaSJdLCJlbWFpbCI6ImFjaGltLmFkbWluQHRlbmFudC5kZSIsImV4cCI6MTU1NzQxMDc5OSwiZmVkZXJhdGVkX2NsYWltcyI6eyJjb25uZWN0b3JfaWQiOiJ0ZW5hbnRfbGRhcF9vcGVubGRhcCIsInVzZXJfaWQiOiJjbj1hY2hpbS5hZG1pbixvdT1QZW9wbGUsZGM9dGVuYW50LGRjPWRlIn0sImdyb3VwcyI6WyJrOHNfa2Fhcy1hZG1pbiIsIms4c19rYWFzLWVkaXQiLCJrOHNfa2Fhcy12aWV3IiwiazhzX2RldmVsb3BtZW50X19jbHVzdGVyLWFkbWluIiwiazhzX3Byb2R1Y3Rpb25fX2NsdXN0ZXItYWRtaW4iLCJrOHNfc3RhZ2luZ19fY2x1c3Rlci1hZG1pbiJdLCJpYXQiOjE1NTczODE5OTksImlzcyI6Imh0dHBzOi8vZGV4LnRlc3QuZmktdHMuaW8vZGV4IiwibmFtZSI6ImFjaGltIiwic3ViIjoiYWNoaW0ifQ.IVpuFWpsN9609d5J54vCQsAlW39rDL2yQl0yXqK2bLUvdoB1SfTtnO5zbHZW-YeH1sl8XpSDDBGZdRevOfcfm-QraiSvo58ZL1zIcJHRidOAKApgVA8TLV6DV-7Eo-2MtAFFpN9Yeiu5c0d_8yz6_KADI8nkfeKJgm4vxN3mUjIekBUMj3DH5nbusl3-JiLAtVdyWhmVAQp7vAPwq2etSUbUoTyQ4aWFOfT2BWumFfE7XBd1D0baXDGXZVIdmlVoovbqdNUezKlMKt8zHdmt7kzO5rtUShQHQOIXzRG7MV2BSA-R0tyjAtvRZyTr58T2xNDQR8bjvKYx6T8-elu7N27AnE2HqBvHf89fV7htlUYC3beq1PT2U0VtOGifLBaEwdwk5SdSRdMv6GcTBpEw0xrxaKcpWWmk3V3RU15RPnnljcg79CkxlsjMhi2BzhWz10JAtoCXxa0nihwmYtXcZiwaD7K1XaicO4kN79IpexgQYoVN4RAP7YIAJ5NPq35TLHOGze23YAbE48hAaS5CcDXHDh61oXBVkRAJFXkGUpzp2pjljPDKAjyVt6HHNrl_ors6fHvUn_9Imo3FNaZpoDlsbUS9rVL63ImLIOhd3kDWlF_nZ7NWCIyXBocZyTiE247VUVBJIx9tvW-D1CRLPvo-FHjPXkTErEE8ygqA5dw"
+	authtokenAlgRS256 = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjAxYzAyZDVkLWNhYTAtNDQ1MC1hZDc2LWJmOTUwNDIwYjhiNiJ9.eyJhdWQiOlsiY2xpLWlkMSIsImNsaS1pZDIiXSwiZW1haWwiOiJhY2hpbS5hZG1pbkB0ZW5hbnQuZGUiLCJleHAiOjE1NTc0MTA3OTksImZlZGVyYXRlZF9jbGFpbXMiOnsiY29ubmVjdG9yX2lkIjoidGVuYW50X2xkYXBfb3BlbmxkYXAiLCJ1c2VyX2lkIjoiY249YWNoaW0uYWRtaW4sb3U9UGVvcGxlLGRjPXRlbmFudCxkYz1kZSJ9LCJncm91cHMiOlsiazhzX2thYXMtYWRtaW4iLCJrOHNfa2Fhcy1lZGl0IiwiazhzX2thYXMtdmlldyIsIms4c19kZXZlbG9wbWVudF9fY2x1c3Rlci1hZG1pbiIsIms4c19wcm9kdWN0aW9uX19jbHVzdGVyLWFkbWluIiwiazhzX3N0YWdpbmdfX2NsdXN0ZXItYWRtaW4iXSwiaWF0IjoxNTU3MzgxOTk5LCJpc3MiOiJodHRwczovL2RleC50ZXN0Lm1ldGFsLXN0YWNrLmlvL2RleCIsIm5hbWUiOiJhY2hpbSIsInN1YiI6ImFjaGltIn0.t4IKOoXgH0A0CpiZhpIlUEz416NEC6VV4M73Fp71h0r23naabw4lsRLEsTl1ziYXHio-v98AokvDhO2tu-9YRwR4qGKZe4IBndSpNmQjK2zTyKR7fMMKfy11y_YkuqoRrkPEG_BMR8x6s7kuU8tMm-pYlezzKLC-2Od1d-XTNAtr6XP_JKicl0GYRm7_cP0m-baa5D2yYMxyojo7cujORXzyB5IYtJkA8JUQx6Hm2EktvD6dfiQ9Fc6V_vo63-54xY180vMBbASJA7gjKr3BeP8Q8WIb6LT_V3ERElqkDQe9IaIpMXbJeF9hJQHc7wd1aexpmTBnNAxVEyUq1CqpXpg_SdrS6hR7blz9H1_3NrnoYI9OrH7tQoaFJrGqBiNkbr2lvdrIhl6pmaELiLsAMOmS3ulsVWUqJH3qQQDXfnENHHnYiFVGn4u3Bqs7DLBtitGW-fKIZYZINDqTts0_-fSi3GQlyZ_dN-G1_A9Bt38DrymhkUwXG821Jc69AcqFVpGsY0s-fiCh38BJAqBZL4RxirlqvLtwFctJBcbycXUE6wK2PBbGfAFCN0C6tdUVg9iUiOtXnJzHzg-G2pEG1BSQtHNrWv5VwU-NFtXlnh0LkTdsUD-ExvbVJX1YkVcOfzkQcvKvKU7B35ddPcDnlVTPker-DUGw5d3bSH4SpJk"
+
+	authtokenAlgNone     = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOlsiY2xpLWlkMSIsImNsaS1pZDIiXSwiZW1haWwiOiJhY2hpbS5hZG1pbkB0ZW5hbnQuZGUiLCJleHAiOjE1NTc0MTA3OTksImZlZGVyYXRlZF9jbGFpbXMiOnsiY29ubmVjdG9yX2lkIjoidGVuYW50X2xkYXBfb3BlbmxkYXAiLCJ1c2VyX2lkIjoiY249YWNoaW0uYWRtaW4sb3U9UGVvcGxlLGRjPXRlbmFudCxkYz1kZSJ9LCJncm91cHMiOlsiazhzX2thYXMtYWRtaW4iLCJrOHNfa2Fhcy1lZGl0IiwiazhzX2thYXMtdmlldyIsIms4c19kZXZlbG9wbWVudF9fY2x1c3Rlci1hZG1pbiIsIms4c19wcm9kdWN0aW9uX19jbHVzdGVyLWFkbWluIiwiazhzX3N0YWdpbmdfX2NsdXN0ZXItYWRtaW4iXSwiaWF0IjoxNTU3MzgxOTk5LCJpc3MiOiJodHRwczovL2RleC50ZXN0Lm1ldGFsLXN0YWNrLmlvL2RleCIsIm5hbWUiOiJhY2hpbSIsInN1YiI6ImFjaGltIn0.e30"
+	authtokenAlgNoneKid  = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIiwgImtpZCI6IjEyMyJ9.eyJhdWQiOlsiY2xpLWlkMSIsImNsaS1pZDIiXSwiZW1haWwiOiJhY2hpbS5hZG1pbkB0ZW5hbnQuZGUiLCJleHAiOjE1NTc0MTA3OTksImZlZGVyYXRlZF9jbGFpbXMiOnsiY29ubmVjdG9yX2lkIjoidGVuYW50X2xkYXBfb3BlbmxkYXAiLCJ1c2VyX2lkIjoiY249YWNoaW0uYWRtaW4sb3U9UGVvcGxlLGRjPXRlbmFudCxkYz1kZSJ9LCJncm91cHMiOlsiazhzX2thYXMtYWRtaW4iLCJrOHNfa2Fhcy1lZGl0IiwiazhzX2thYXMtdmlldyIsIms4c19kZXZlbG9wbWVudF9fY2x1c3Rlci1hZG1pbiIsIms4c19wcm9kdWN0aW9uX19jbHVzdGVyLWFkbWluIiwiazhzX3N0YWdpbmdfX2NsdXN0ZXItYWRtaW4iXSwiaWF0IjoxNTU3MzgxOTk5LCJpc3MiOiJodHRwczovL2RleC50ZXN0Lm1ldGFsLXN0YWNrLmlvL2RleCIsIm5hbWUiOiJhY2hpbSIsInN1YiI6ImFjaGltIn0.e30"
+	authtokenAlgHS256    = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidGhlQXVkaWVuY2UiXSwiZW1haWwiOiJhY2hpbS5hZG1pbkB0ZW5hbnQuZGUiLCJleHAiOjE1ODc3NTAxNzUsImZlZGVyYXRlZF9jbGFpbXMiOnsiY29ubmVjdG9yX2lkIjoidG50X2xkYXBfb3BlbmxkYXAiLCJ1c2VyX2lkIjoiY249YWNoaW0uYWRtaW4sb3U9UGVvcGxlLGRjPXRlbmFudCxkYz1kZSJ9LCJncm91cHMiOlsiZ3JwYSIsImdycGIiXSwiaWF0IjoxNTg3NzM1Nzc1LCJpc3MiOiJodHRwczovL2RleC50ZXN0Lm1ldGFsLXN0YWNrLmlvL2RleCIsIm5hbWUiOiJhY2hpbSIsInN1YiI6ImFjaGltIn0.Kf-ejz7xW8CoJm40jdx9OFbwJ4SRWKaR8_o72WMTGVU"
+	authtokenAlgHS256Kid = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsICJraWQiOiIwMWMwMmQ1ZC1jYWEwLTQ0NTAtYWQ3Ni1iZjk1MDQyMGI4YjYifQ.eyJhdWQiOlsidGhlQXVkaWVuY2UiXSwiZW1haWwiOiJhY2hpbS5hZG1pbkB0ZW5hbnQuZGUiLCJleHAiOjE1ODc3NTMxODYsImZlZGVyYXRlZF9jbGFpbXMiOnsiY29ubmVjdG9yX2lkIjoidG50X2xkYXBfb3BlbmxkYXAiLCJ1c2VyX2lkIjoiY249YWNoaW0uYWRtaW4sb3U9UGVvcGxlLGRjPXRlbmFudCxkYz1kZSJ9LCJncm91cHMiOlsiZ3JwYSIsImdycGIiXSwiaWF0IjoxNTg3NzM4Nzg2LCJpc3MiOiJodHRwczovL2RleC50ZXN0Lm1ldGFsLXN0YWNrLmlvL2RleCIsIm5hbWUiOiJhY2hpbSIsInN1YiI6ImFjaGltIn0.vHRBpA1Jvb6kPLI56xCdIh42or96N5sOHg3cHs-is-o"
 
 	dk1 = map[string]interface{}{
 		"use": "sig",
 		"kty": "RSA",
-		"kid": "464128c9-eec7-4b2d-be56-644e54a15fcc",
+		"kid": "01c02d5d-caa0-4450-ad76-bf950420b8b6",
 		"alg": "RS256",
-		"n":   "qC2IPIE_zbAa8UwgSkTQnlh2JSiTPoMf7Bc4wPHt0InMhxrr6gID9zYAXh8Q9Mwoyuh9oYxwenRXwnqACKyqmPIwhZKerRRqk1y_sLTQDWndvpSISWrOjcEFAWAuHn0b6BU9L06TrO33MULYfhx-R2ftnl1P6pGdght3yuJzLSvOmXE-s3t0KZ4rQn4GAVQ25e9S06tkmel1huJESG9UhKtcaNFN17NakqpePozmhIK4NUxMX-Os3WPoElhU28OmDyw_PdG8CfygXiCrUvIgNlm85JBtkG-A-OaXMntp_aNEM-7YPqsiEKS0bTUUdHVi4Q1cegYciBedOtoVtVUDIIb2wD96rus-cfzN4gnyHtDRjGcIEZBHX_DJ9ZRC7RtO6KwKnHQ6aKSJbfJrJ840msLfPb2oagD0zCNWZHU_W9ClvEbhIzyvk4TgU9ar5z03YB9tMlICinV5zGjUARdBSH5bVNVtAsxfbx8Y7CkTGicz7-ocrsBJB07HR18HbPZf5TdRY4uPA0f3T4w4_wh6wt5qgXU5DjsAYLWabptRBTFyiI0iYwCBSvTtRaDJgMilZJoUjWWj86-Y__xZzwntcuZhYqB7pBvjkOUdlsQfe6s4r1z0-D5NOyYO63t-QH0QVvEVfdDmjCb7zBvde-ph61og5xNDp80VjX-m40y0x7E",
+		"n":   "zFSDsEpZ-EegnJpYFTmaUVz2OvtCQty1gYFxLECICU2lrFCxoAFnkARjbyuvT68sIbhdSZ981YoY_oVohhLOMZjNV3KUhRPlMaSZsEDfnZLOGjfRzjOLNGwtcfu7uLvSVOhaF1bqNUtQHN1ljEmcHWJbJzPFLOBD5uK5tZ-zT0q8NyDRnIB3yNPppk1OpMgmAvxpXaIjsTUfOaOz4vbG6opWg4wz-cLgtyvA1YMSQ24EVnHPC4b2fJOJf9DXf1qkVNjiY9BqO19afv8pM1cliYu66wN4D_eAXQnhA_8j6AQyNkHusaOG1TCzxyPQDtcQYjNZfhQBxXLZE_JM_XdCSAdtwPcQTsySHQHIxsFG3M90DiuukCc7iusAcmCupY5jXTH70_ZykvvaTqxgjavj5zsSndiCwSicrJSoh4YwhqUsZMKivphhyZIb0VpzWRhTYhlN1snC184caa_kPgyRRZux40RxCjluo9Taftm2MUji4BZ_TovUG2IBsOJdp9OdmKT9zuw_feNUL5o3ImCmP4ifI03I3kCATS-KnvNnILQQXYpwP-6hNEZJAXcBtXUnoqMbOdqOjKjNc8ZIBwINe8WVuCZhH2bZc0RK8kh6EgZupMrxAPmmvzfr8RgfU8LKOkQ6Y41UhE7qCkLWARLgQpaRu5HmE_YrZvodqSmY3fU",
 		"e":   "AQAB",
 	}
 	dk2 = map[string]interface{}{
@@ -43,6 +48,14 @@ var (
 		"n":   "qMu9ak2GZVy7mgSG2nqDJAlYBqXCTTbtSTEtAVpYKcCZKRkDY7kWkPrE8rdhuZV0sVN1-5SQivaDtfXSMBBaLpZFbhA0l98fH3ExOpVbdlHNNWd3mSJEcEFc1QGhc755shyFIliOW59JMNzETIF8eq-MXMt8dKxtnUVZWJk8EYOQSxYK7E9cl4HtACIoGHchRrUctIUJBFgSRbKx1u-_Qnf9cnJeSNdXKL8l7bvLtm5UZWPQrUo229pQ687jUKZu-k2Xag3bAsRGJ6ScbWuLBIJdOxNbvnA3XyARxvqIeZAoEFxDn3q6rhyG024MeRhn4Rd_RzeEq2Y0hsa68M7pkw",
 		"e":   "AQAB",
 	}
+	dk123 = map[string]interface{}{
+		"use": "sig",
+		"kty": "RSA",
+		"kid": "123",
+		"alg": "RS256",
+		"n":   "zFSDsEpZ-EegnJpYFTmaUVz2OvtCQty1gYFxLECICU2lrFCxoAFnkARjbyuvT68sIbhdSZ981YoY_oVohhLOMZjNV3KUhRPlMaSZsEDfnZLOGjfRzjOLNGwtcfu7uLvSVOhaF1bqNUtQHN1ljEmcHWJbJzPFLOBD5uK5tZ-zT0q8NyDRnIB3yNPppk1OpMgmAvxpXaIjsTUfOaOz4vbG6opWg4wz-cLgtyvA1YMSQ24EVnHPC4b2fJOJf9DXf1qkVNjiY9BqO19afv8pM1cliYu66wN4D_eAXQnhA_8j6AQyNkHusaOG1TCzxyPQDtcQYjNZfhQBxXLZE_JM_XdCSAdtwPcQTsySHQHIxsFG3M90DiuukCc7iusAcmCupY5jXTH70_ZykvvaTqxgjavj5zsSndiCwSicrJSoh4YwhqUsZMKivphhyZIb0VpzWRhTYhlN1snC184caa_kPgyRRZux40RxCjluo9Taftm2MUji4BZ_TovUG2IBsOJdp9OdmKT9zuw_feNUL5o3ImCmP4ifI03I3kCATS-KnvNnILQQXYpwP-6hNEZJAXcBtXUnoqMbOdqOjKjNc8ZIBwINe8WVuCZhH2bZc0RK8kh6EgZupMrxAPmmvzfr8RgfU8LKOkQ6Y41UhE7qCkLWARLgQpaRu5HmE_YrZvodqSmY3fU",
+		"e":   "AQAB",
+	}
 
 	firstkeys = []map[string]interface{}{
 		dk1,
@@ -55,6 +68,7 @@ var (
 		dk1,
 		dk2,
 		dk3,
+		dk123,
 	}
 	secondkeydata = map[string]interface{}{
 		"keys": secondkeys,
@@ -124,23 +138,72 @@ func TestDex_keyfetcher(t *testing.T) {
 
 func TestDex_User(t *testing.T) {
 	test := []struct {
-		name string
-		t    time.Time
-		err  string
+		name  string
+		opt   Option
+		token string
+		t     time.Time
+		err   string
 	}{
 		{
-			name: "correct bearer",
-			t:    time.Date(2019, time.May, 9, 6, 7, 0, 0, time.UTC),
+			name:  "correct bearer",
+			token: authtokenAlgRS256,
+			t:     time.Date(2019, time.May, 9, 6, 7, 0, 0, time.UTC),
 		},
 		{
-			name: "token used before issued",
-			t:    time.Date(2019, time.May, 9, 6, 6, 0, 0, time.UTC),
-			err:  "Token used before issued",
+			name:  "correct bearer - explicit whitelist",
+			opt:   AlgorithmsWhitelist([]string{"RS256"}),
+			token: authtokenAlgRS256,
+			t:     time.Date(2019, time.May, 9, 6, 7, 0, 0, time.UTC),
 		},
 		{
-			name: "token is expired",
-			t:    time.Date(2019, time.May, 10, 6, 6, 0, 0, time.UTC),
-			err:  "token is expired by 15h59m21s",
+			name:  "token used before issued",
+			token: authtokenAlgRS256,
+			t:     time.Date(2019, time.May, 9, 6, 6, 0, 0, time.UTC),
+			err:   "Token used before issued",
+		},
+		{
+			name:  "token is expired",
+			token: authtokenAlgRS256,
+			t:     time.Date(2019, time.May, 10, 6, 6, 0, 0, time.UTC),
+			err:   "token is expired by 15h59m21s",
+		},
+		{
+			name:  "token invalid default whitelist - signature algorithm 'none' no kid",
+			token: authtokenAlgNone,
+			t:     time.Date(2019, time.May, 10, 6, 6, 0, 0, time.UTC),
+			err:   "invalid token",
+		},
+		{
+			name:  "token invalid default whitelist - signature algorithm 'none' with kid",
+			token: authtokenAlgNoneKid,
+			t:     time.Date(2019, time.May, 10, 6, 6, 0, 0, time.UTC),
+			err:   "invalid token",
+		},
+		{
+			name:  "token invalid default whitelist - signature algorithm 'HS256' no kid",
+			token: authtokenAlgHS256,
+			t:     time.Date(2019, time.May, 10, 6, 6, 0, 0, time.UTC),
+			err:   "invalid token",
+		},
+		{
+			name:  "token invalid default whitelist - signature algorithm 'HS256' with kid",
+			token: authtokenAlgHS256Kid,
+			t:     time.Date(2019, time.May, 10, 6, 6, 0, 0, time.UTC),
+			err:   "invalid token",
+		},
+		{
+			name:  "algorithm not in whitelist 'RS256' - signature algorithm 'HS256' with kid",
+			token: authtokenAlgHS256Kid,
+			opt:   AlgorithmsWhitelist([]string{"RS256"}),
+			t:     time.Date(2019, time.May, 10, 6, 6, 0, 0, time.UTC),
+			err:   "invalid token",
+		},
+		{
+			name:  "algorithm not in whitelist - empty whitelist",
+			token: authtokenAlgRS256,
+			opt:   AlgorithmsWhitelist([]string{}),
+			t:     time.Date(2019, time.May, 10, 6, 6, 0, 0, time.UTC),
+			err:   "invalid token",
 		},
 	}
 	for _, tt := range test {
@@ -161,8 +224,11 @@ func TestDex_User(t *testing.T) {
 				t.Errorf("NewDex() error = %v", err)
 				return
 			}
+			if tt.opt != nil {
+				tt.opt(dx)
+			}
 			rq := httptest.NewRequest(http.MethodGet, srv.URL, nil)
-			rq.Header.Add("Authorization", "Bearer "+authtoken)
+			rq.Header.Add("Authorization", "Bearer "+tt.token)
 			usr, err := dx.User(rq)
 			if err != nil {
 				if tt.err != "" && tt.err == err.Error() {
@@ -244,7 +310,7 @@ func TestDex_UserWithOptions(t *testing.T) {
 			}))
 
 			rq := httptest.NewRequest(http.MethodGet, srv.URL, nil)
-			rq.Header.Add("Authorization", "Bearer "+authtoken)
+			rq.Header.Add("Authorization", "Bearer "+authtokenAlgRS256)
 			usr, err := dx.User(rq)
 			if err != nil {
 				if tt.err != "" && tt.err == err.Error() {
