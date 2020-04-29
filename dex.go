@@ -1,6 +1,7 @@
 package security
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -25,6 +26,8 @@ type Dex struct {
 	update          chan updater
 	refreshInterval time.Duration
 
+	algorithmWhitelist []string
+
 	userExtractor UserExtractorFn
 }
 
@@ -42,6 +45,8 @@ func NewDex(baseurl string) (*Dex, error) {
 		baseURL:         baseurl,
 		refreshInterval: refetchInterval,
 		userExtractor:   defaultUserExtractor,
+
+		algorithmWhitelist: []string{"RS256", "RS512"},
 	}
 	if err := dx.keyfetcher(); err != nil {
 		return nil, err
@@ -69,6 +74,22 @@ func UserExtractor(fn UserExtractorFn) Option {
 		dex.userExtractor = fn
 		return dex
 	}
+}
+
+func AlgorithmsWhitelist(algNames []string) Option {
+	return func(dex *Dex) *Dex {
+		dex.algorithmWhitelist = algNames
+		return dex
+	}
+}
+
+func (dx *Dex) algorithmSupported(alg string) bool {
+	for _, a := range dx.algorithmWhitelist {
+		if a == alg {
+			return true
+		}
+	}
+	return false
 }
 
 // the keyfetcher fetches the keys from the remote dex at a regular interval.
@@ -159,7 +180,17 @@ func (dx *Dex) User(rq *http.Request) (*User, error) {
 	bearerToken := strings.TrimSpace(splitToken[1])
 
 	token, err := jwt.ParseWithClaims(bearerToken, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		kid := token.Header["kid"].(string)
+		alg, ok := token.Header["alg"].(string)
+		if !ok {
+			return nil, errors.New("invalid token")
+		}
+		if !dx.algorithmSupported(alg) {
+			return nil, errors.New("invalid token")
+		}
+		kid, ok := token.Header["kid"].(string)
+		if !ok {
+			return nil, errors.New("invalid token")
+		}
 		return dx.searchKey(kid)
 	})
 	if err != nil {
