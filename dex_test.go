@@ -1,6 +1,7 @@
 package security
 
 import (
+	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
 
@@ -10,10 +11,8 @@ import (
 	"net/http/httptest"
 
 	"encoding/json"
-
-	"time"
-
 	"github.com/dgrijalva/jwt-go"
+	"time"
 )
 
 var (
@@ -102,7 +101,7 @@ func TestDex_keyfetcher(t *testing.T) {
 			t.Errorf("no keys returned: %v", err)
 			return
 		}
-		// now check fi the current cached keys is identical to our mocked keysets
+		// now check if the current cached keys is identical to our mocked keysets
 		// so we can be sure there was a fetch-request
 		if len(keys.Keys) != len(d) {
 			t.Errorf("the fetched keys are not expected, did you update dex?")
@@ -114,6 +113,123 @@ func TestDex_keyfetcher(t *testing.T) {
 				t.Errorf("got KeyID: %q, want %q", k.KeyID(), kid)
 			}
 		}
+		_, err = dx.searchKey(searchkey)
+		if err != nil {
+			t.Errorf("the key %q could not be retrieved: %v", searchkey, err)
+			return
+		}
+	}
+}
+
+func TestDex_keyfetcher_robustness(t *testing.T) {
+	keysfetched := false
+	secondKeySet := false
+	wakeupCh := make(chan bool, 1)
+	sleepDuration := 0 * time.Second
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, rq *http.Request) {
+		select {
+		case <-wakeupCh:
+		default:
+		}
+		w.Header().Add("content-type", "application/json")
+		if sleepDuration > 0 {
+			select {
+			case <-wakeupCh:
+				return
+			case <-time.After(sleepDuration):
+				break
+			}
+		}
+		if secondKeySet {
+			err := json.NewEncoder(w).Encode(secondkeydata)
+			if err != nil {
+				t.Error(err)
+			}
+		} else {
+			err := json.NewEncoder(w).Encode(firstkeydata)
+			if err != nil {
+				t.Error(err)
+			}
+		}
+		keysfetched = true
+	}))
+
+	// default timeout is 5 secs
+	sleepDuration = 10 * time.Second
+	dx, err := NewDex(srv.URL)
+	require.Error(t, err, "expected error timeout")
+
+	// end sleep
+	wakeupCh <- true
+
+	// this time the service responds within timeout
+	sleepDuration = 100 * time.Millisecond
+
+	// shorten the http-client-timeout
+	var client = &http.Client{
+		Timeout: time.Second * 2,
+	}
+	dx, err = NewDex(srv.URL, Client(client), RefreshInterval(3*time.Second))
+	require.NoError(t, err)
+	require.True(t, keysfetched, "expected the keys to be fetched")
+	// keys are available
+	_, err = dx.searchKey(dk1["kid"].(string))
+	assert.NoError(t, err)
+	_, err = dx.searchKey(dk2["kid"].(string))
+	assert.NoError(t, err)
+	// this forces an update
+	_, err = dx.searchKey(dk3["kid"].(string))
+	assert.Error(t, err)
+
+	// end sleep
+	wakeupCh <- true
+
+	// the update will fail
+	sleepDuration = 5 * time.Second
+
+	// wait for refreshInterval to pass
+	time.Sleep(4 * time.Second)
+
+	// cannot fetch keys, after that the cache is empty and has error.
+	_, err = dx.fetchKeys()
+	require.Error(t, err)
+
+	// end sleep
+	wakeupCh <- true
+
+	// key update will succeed
+	sleepDuration = 200 * time.Millisecond
+
+	// wait for refreshInterval to pass
+	time.Sleep(4 * time.Second)
+
+	t.Log("Testing keys")
+	data := [][]map[string]interface{}{firstkeys, secondkeys}
+	searchkey := dk3["kid"].(string)
+	// the server will return first "firstkeys" and on the second call "secondkeys"
+	// only the secondkeys contains "dk3", so the following tests if the dex
+	// will be refreshed with new keys if a key is not found in the current cached
+	// keyset
+	for _, d := range data {
+		keys, err := dx.fetchKeys()
+		secondKeySet = true
+		if err != nil {
+			t.Errorf("no keys returned: %v", err)
+			return
+		}
+		// now check if the current cached keys is identical to our mocked keysets
+		// so we can be sure there was a fetch-request
+		if len(keys.Keys) != len(d) {
+			t.Errorf("the fetched keys are not expected, did you update dex?")
+			return
+		}
+		for i, k := range keys.Keys {
+			kid := d[i]["kid"].(string)
+			if k.KeyID() != kid {
+				t.Errorf("got KeyID: %q, want %q", k.KeyID(), kid)
+			}
+		}
+
 		_, err = dx.searchKey(searchkey)
 		if err != nil {
 			t.Errorf("the key %q could not be retrieved: %v", searchkey, err)
@@ -215,14 +331,8 @@ func TestDex_UserWithOptions(t *testing.T) {
 				}
 			}))
 
-			dx, err := NewDex(srv.URL)
-			if err != nil {
-				t.Errorf("NewDex() error = %v", err)
-				return
-			}
-
 			// change Name to akim and de-prefix groups - just for this test
-			dx.With(UserExtractor(func(claims *Claims) (user *User, e error) {
+			dx, err := NewDex(srv.URL, UserExtractor(func(claims *Claims) (user *User, e error) {
 				var grps []ResourceAccess
 				for _, g := range claims.Groups {
 					grps = append(grps, ResourceAccess(strings.TrimPrefix(g, "k8s_")))
@@ -242,6 +352,10 @@ func TestDex_UserWithOptions(t *testing.T) {
 				}
 				return &usr, nil
 			}))
+			if err != nil {
+				t.Errorf("NewDex() error = %v", err)
+				return
+			}
 
 			rq := httptest.NewRequest(http.MethodGet, srv.URL, nil)
 			rq.Header.Add("Authorization", "Bearer "+authtoken)

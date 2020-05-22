@@ -24,8 +24,9 @@ type Dex struct {
 	keys            chan<- keyRQ
 	update          chan updater
 	refreshInterval time.Duration
-
-	userExtractor UserExtractorFn
+	fetchTimeout    time.Duration
+	client          *http.Client
+	userExtractor   UserExtractorFn
 }
 
 type keyRsp struct {
@@ -37,11 +38,18 @@ type keyRQ struct {
 }
 
 // NewDex returns a new Dex.
-func NewDex(baseurl string) (*Dex, error) {
+func NewDex(baseurl string, opts ...Option) (*Dex, error) {
+	var client = &http.Client{
+		Timeout: time.Second * 10,
+	}
 	dx := &Dex{
 		baseURL:         baseurl,
 		refreshInterval: refetchInterval,
+		client:          client,
 		userExtractor:   defaultUserExtractor,
+	}
+	for _, opt := range opts {
+		opt(dx)
 	}
 	if err := dx.keyfetcher(); err != nil {
 		return nil, err
@@ -53,6 +61,7 @@ func NewDex(baseurl string) (*Dex, error) {
 type Option func(dex *Dex) *Dex
 
 // With sets available Options
+// Deprecated: use options in NewDex instead
 func (dx *Dex) With(opts ...Option) *Dex {
 	for _, opt := range opts {
 		opt(dx)
@@ -71,13 +80,29 @@ func UserExtractor(fn UserExtractorFn) Option {
 	}
 }
 
+// RefreshInterval sets the interval of key refreshes
+func RefreshInterval(refreshInterval time.Duration) Option {
+	return func(dex *Dex) *Dex {
+		dex.refreshInterval = refreshInterval
+		return dex
+	}
+}
+
+// Client sets the httpClient to use for key fetch
+func Client(client *http.Client) Option {
+	return func(dex *Dex) *Dex {
+		dex.client = client
+		return dex
+	}
+}
+
 // the keyfetcher fetches the keys from the remote dex at a regular interval.
 // if the client needs the keys it returns the cached keys.
 func (dx *Dex) keyfetcher() error {
 	c := make(chan keyRQ)
 	dx.keys = c
 	dx.update = make(chan updater)
-	keys, err := jwk.Fetch(dx.baseURL + "/keys")
+	keys, err := jwk.Fetch(dx.baseURL+"/keys", jwk.WithHTTPClient(dx.client))
 	if err != nil {
 		return fmt.Errorf("cannot fetch dex keys from %s/keys: %v", dx.baseURL, err)
 	}
@@ -120,9 +145,9 @@ func (dx *Dex) forceUpdate() {
 }
 
 func (dx *Dex) updateKeys(old *jwk.Set, reason string) (*jwk.Set, error) {
-	k, e := jwk.Fetch(dx.baseURL + "/keys")
+	k, e := jwk.Fetch(dx.baseURL+"/keys", jwk.WithHTTPClient(dx.client))
 	if e != nil {
-		return old, fmt.Errorf("cannot fetch dex keys from %s/keys: %v", dx.baseURL, e)
+		return old, fmt.Errorf("cannot fetch dex keys (triggered by %s) from %s/keys: %v", reason, dx.baseURL, e)
 	}
 	return k, e
 }
@@ -140,7 +165,12 @@ func (dx *Dex) searchKey(kid string) (interface{}, error) {
 			dx.forceUpdate()
 			continue
 		}
-		return jwtkeys[0].Materialize()
+		var key interface{}
+		err = jwtkeys[0].Raw(&key)
+		if err != nil {
+			return nil, err
+		}
+		return key, nil
 	}
 	return nil, fmt.Errorf("key %q not found", kid)
 }
