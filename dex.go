@@ -76,6 +76,7 @@ func UserExtractor(fn UserExtractorFn) Option {
 	}
 }
 
+// AlgorithmsWhitelist adds given algorithms as allowed
 func AlgorithmsWhitelist(algNames []string) Option {
 	return func(dex *Dex) *Dex {
 		dex.algorithmWhitelist = algNames
@@ -161,7 +162,9 @@ func (dx *Dex) searchKey(kid string) (interface{}, error) {
 			dx.forceUpdate()
 			continue
 		}
-		return jwtkeys[0].Materialize()
+		var key interface{}
+		err = jwtkeys[0].Raw(&key)
+		return key, err
 	}
 	return nil, fmt.Errorf("key %q not found", kid)
 }
