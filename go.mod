@@ -1,13 +1,11 @@
 module github.com/metal-stack/security
 
-go 1.13
+go 1.14
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/go-openapi/runtime v0.19.15
-	github.com/kr/pretty v0.2.0 // indirect
-	github.com/lestrrat-go/jwx v0.9.2
-	github.com/pkg/errors v0.9.1 // indirect
-	github.com/stretchr/testify v1.5.1
-	golang.org/x/net v0.0.0-20200425230154-ff2c4b7c35a0
+	github.com/go-openapi/runtime v0.19.21
+	github.com/lestrrat-go/jwx v1.0.4
+	github.com/stretchr/testify v1.6.1
+	golang.org/x/net v0.0.0-20200904194848-62affa334b73
 )
