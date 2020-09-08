@@ -1,6 +1,10 @@
 package security
 
 import (
+	"crypto/rsa"
+	"encoding/base64"
+	"github.com/stretchr/testify/assert"
+	"math/big"
 	"strings"
 	"testing"
 
@@ -116,7 +120,7 @@ func TestDex_keyfetcher(t *testing.T) {
 			t.Errorf("no keys returned: %v", err)
 			return
 		}
-		// now check fi the current cached keys is identical to our mocked keysets
+		// now check fi the current cached key is identical to our mocked keysets
 		// so we can be sure there was a fetch-request
 		if len(keys.Keys) != len(d) {
 			t.Errorf("the fetched keys are not expected, did you update dex?")
@@ -128,11 +132,22 @@ func TestDex_keyfetcher(t *testing.T) {
 				t.Errorf("got KeyID: %q, want %q", k.KeyID(), kid)
 			}
 		}
-		_, err = dx.searchKey(searchkey)
+		k, err := dx.searchKey(searchkey)
 		if err != nil {
 			t.Errorf("the key %q could not be retrieved: %v", searchkey, err)
 			return
 		}
+
+		assert.IsType(t, &rsa.PublicKey{}, k)
+		pub := k.(*rsa.PublicKey)
+		e, err := base64.RawURLEncoding.DecodeString(dk3["e"].(string))
+		assert.NoError(t, err)
+		ei := new(big.Int).SetBytes(e)
+		assert.Equal(t, int(ei.Int64()), pub.E)
+		n, err := base64.RawURLEncoding.DecodeString(dk3["n"].(string))
+		ni := new(big.Int).SetBytes(n)
+		assert.NoError(t, err)
+		assert.Equal(t, ni.String(), pub.N.String())
 	}
 }
 
