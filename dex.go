@@ -65,6 +65,20 @@ func (dx *Dex) With(opts ...Option) *Dex {
 	return dx
 }
 
+// Claims we overwrite the Audience because in the current version of the jwt library this
+// is not an array.
+type Claims struct {
+	jwt.StandardClaims
+	Audience        interface{}       `json:"aud,omitempty"`
+	Groups          []string          `json:"groups"`
+	EMail           string            `json:"email"`
+	Name            string            `json:"name"`
+	FederatedClaims map[string]string `json:"federated_claims"`
+
+	// added for parsing of "new" style tokens
+	Roles []string `json:"roles"`
+}
+
 // UserExtractorFn extracts the User and Claims
 type UserExtractorFn func(claims *Claims) (*User, error)
 
