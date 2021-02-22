@@ -8,19 +8,30 @@ type UserGetterProxy struct {
 	defaultUG UserGetter
 }
 
+// UserGetterProxyOption defines the signature of init option-parameter
+type UserGetterProxyOption func(ug *UserGetterProxy)
+
 // NewUserGetterProxy creates a new UserGetterProxy with the given default UserGetter which is
 // used if no other match is found.
-func NewUserGetterProxy(defaultUG UserGetter) *UserGetterProxy {
-	return &UserGetterProxy{
+func NewUserGetterProxy(defaultUG UserGetter, opts ...UserGetterProxyOption) *UserGetterProxy {
+	ugp := &UserGetterProxy{
 		ugs:       make(map[string]UserGetter),
 		defaultUG: defaultUG,
 	}
+
+	for _, o := range opts {
+		o(ugp)
+	}
+
+	return ugp
 }
 
-// Add adds the given UserGetter for the specified issuer/clientid combination that takes precedence
+// UserGetterProxyMapping adds the given UserGetter for the specified issuer/clientid combination that takes precedence
 // over the default UserGetter if matched.
-func (u *UserGetterProxy) Add(issuer, clientid string, ug UserGetter) {
-	u.ugs[cacheKey(issuer, clientid)] = ug
+func UserGetterProxyMapping(issuer, clientid string, userGetter UserGetter) UserGetterProxyOption {
+	return func(ug *UserGetterProxy) {
+		ug.ugs[cacheKey(issuer, clientid)] = userGetter
+	}
 }
 
 func (u *UserGetterProxy) User(rq *http.Request) (*User, error) {

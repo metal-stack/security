@@ -50,10 +50,10 @@ func TestUserGetterProxy_User(t *testing.T) {
 			name: "default and alternative",
 			args: args{
 				proxy: func() *UserGetterProxy {
-					p := NewUserGetterProxy(DummyUG{u: dummyUser1})
-					p.Add("https://oidc.metal.io", "metal", DummyUG{u: dummyUser3})
-					p.Add("https://oidc.metal-stack.io", "metal-stack", DummyUG{u: dummyUser2})
-					p.Add("https://some-other-oidc.com", "abc123", DummyUG{u: dummyUser4})
+					p := NewUserGetterProxy(DummyUG{u: dummyUser1},
+						UserGetterProxyMapping("https://oidc.metal.io", "metal", DummyUG{u: dummyUser3}),
+						UserGetterProxyMapping("https://oidc.metal-stack.io", "metal-stack", DummyUG{u: dummyUser2}),
+						UserGetterProxyMapping("https://some-other-oidc.com", "abc123", DummyUG{u: dummyUser4}))
 					return p
 				}(),
 			},
