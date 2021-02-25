@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/go-openapi/runtime"
 	"golang.org/x/net/context"
 )
@@ -40,17 +39,6 @@ func (ra accessGroup) asSet() resourceSet {
 	return groupset
 }
 
-// Claims we overwrite the Audience because in the current version of the jwt library this
-// is not an array.
-type Claims struct {
-	jwt.StandardClaims
-	Audience        interface{}       `json:"aud,omitempty"`
-	Groups          []string          `json:"groups"`
-	EMail           string            `json:"email"`
-	Name            string            `json:"name"`
-	FederatedClaims map[string]string `json:"federated_claims"`
-}
-
 // HasGroup returns true if the user has at least one of the given groups.
 func (u *User) HasGroup(grps ...ResourceAccess) bool {
 	acc := accessGroup(u.Groups).asSet()
@@ -69,14 +57,14 @@ type UserGetter interface {
 
 // UserCreds stores different methods for user extraction from a request.
 type UserCreds struct {
-	dex       *Dex
+	dex       UserGetter
 	macauther []HMACAuth
 }
 
 // CredsOpt is a option setter for UserCreds
 type CredsOpt func(*UserCreds)
 
-// NewCreds returns a credention checker which tries to pull out the current user
+// NewCreds returns a credential checker which tries to pull out the current user
 // of a request. You can set many different HMAC auth'ers but only one for bearer tokens.
 func NewCreds(opts ...CredsOpt) *UserCreds {
 	res := &UserCreds{}
@@ -89,7 +77,7 @@ func NewCreds(opts ...CredsOpt) *UserCreds {
 }
 
 // WithDex sets the dex auther.
-func WithDex(d *Dex) CredsOpt {
+func WithDex(d UserGetter) CredsOpt {
 	return func(uc *UserCreds) {
 		uc.dex = d
 	}
