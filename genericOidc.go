@@ -50,6 +50,9 @@ func NewGenericOIDC(ic *IssuerConfig, opts ...GenericOIDCOption) (*GenericOIDC, 
 	}
 
 	client := &http.Client{
+		Transport: &http.Transport{
+			DisableKeepAlives: true,
+		},
 		Timeout: cfg.Timeout,
 	}
 	ctx := context.Background()
