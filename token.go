@@ -100,10 +100,27 @@ func CreateTokenAndKeys(cfg *TokenCfg) (token string, pubKey jose.JSONWebKey, pr
 // TokenProvider creates the token with the given TokenCfg
 type TokenProvider func(cfg *TokenCfg) (string, jose.JSONWebKey, jose.JSONWebKey)
 
+type KeyServerConfig struct {
+	keyResponseDelay time.Duration
+}
+
+type KeyServerOption func(cfg *KeyServerConfig)
+
+func KeyResponseTimeDelay(delay time.Duration) KeyServerOption {
+	return func(cfg *KeyServerConfig) {
+		cfg.keyResponseDelay = delay
+	}
+}
+
 // GenerateTokenAndKeyServer starts keyserver, patches tokenCfg (issuer), generates token.
 // This method is intended for test purposes, where you need a server that provides
 // '.well-known/openid-configuration' and '/keys' endpoints.
-func GenerateTokenAndKeyServer(tc *TokenCfg, tokenProvider TokenProvider) (srv *httptest.Server, token string, err error) {
+func GenerateTokenAndKeyServer(tc *TokenCfg, tokenProvider TokenProvider, opts ...KeyServerOption) (srv *httptest.Server, token string, err error) {
+
+	cfg := &KeyServerConfig{}
+	for _, o := range opts {
+		o(cfg)
+	}
 
 	var issuer string
 	var pubKey jose.JSONWebKey
@@ -135,6 +152,9 @@ func GenerateTokenAndKeyServer(tc *TokenCfg, tokenProvider TokenProvider) (srv *
 	mx.HandleFunc("/keys", func(writer http.ResponseWriter, request *http.Request) {
 		ks := jose.JSONWebKeySet{
 			Keys: []jose.JSONWebKey{pubKey},
+		}
+		if cfg.keyResponseDelay > 0 {
+			time.Sleep(cfg.keyResponseDelay)
 		}
 		err := json.NewEncoder(writer).Encode(ks)
 		if err != nil {

@@ -3,6 +3,9 @@ package security
 import (
 	"context"
 	"net/http"
+	"time"
+
+	"golang.org/x/oauth2"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"gopkg.in/square/go-jose.v2/jwt"
@@ -29,6 +32,7 @@ type GenericOIDC struct {
 // GenericOIDCCfg properties that can be modified by Options
 type GenericOIDCCfg struct {
 	SupportedSigningAlgs []string
+	Timeout              time.Duration
 	UserExtractorFn      GenericUserExtractorFn
 }
 
@@ -37,6 +41,7 @@ func NewGenericOIDC(ic *IssuerConfig, opts ...GenericOIDCOption) (*GenericOIDC, 
 
 	cfg := &GenericOIDCCfg{
 		UserExtractorFn:      DefaultGenericUserExtractor,
+		Timeout:              10 * time.Second,
 		SupportedSigningAlgs: []string{"RS256", "RS384", "RS512"},
 	}
 
@@ -44,7 +49,12 @@ func NewGenericOIDC(ic *IssuerConfig, opts ...GenericOIDCOption) (*GenericOIDC, 
 		opt(cfg)
 	}
 
+	client := &http.Client{
+		Timeout: cfg.Timeout,
+	}
 	ctx := context.Background()
+	ctx = context.WithValue(ctx, oauth2.HTTPClient, client)
+
 	provider, err := oidc.NewProvider(ctx, ic.Issuer)
 	if err != nil {
 		return nil, err
@@ -106,6 +116,12 @@ type GenericOIDCOption func(oidc *GenericOIDCCfg)
 func AllowedSignAlgs(algs []string) GenericOIDCOption {
 	return func(o *GenericOIDCCfg) {
 		o.SupportedSigningAlgs = algs
+	}
+}
+
+func Timeout(timeout time.Duration) GenericOIDCOption {
+	return func(o *GenericOIDCCfg) {
+		o.Timeout = timeout
 	}
 }
 
