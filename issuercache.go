@@ -119,6 +119,10 @@ func (i *MultiIssuerCache) User(rq *http.Request) (*User, error) {
 		}
 	}
 
+	if iss == nil {
+		return nil, IssuerNotFound{}
+	}
+
 	i.log.Info("found issuer", "issuer", iss)
 
 	if iss.userGetter == nil {

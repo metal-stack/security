@@ -109,6 +109,27 @@ func TestIssuerResolver_User(t *testing.T) {
 			wantErr: nil,
 		},
 		{
+			name: "valid token, issuer not found",
+			fields: fields{
+				userExtractorFn: DefaultGenericUserExtractor,
+				tokenFn:         MustCreateTokenAndKeys,
+				clientId:        str2p("metal-stack"),
+			},
+			args: args{
+				tokenCfg: func() *TokenCfg {
+					cfg := DefaultTokenCfg()
+					cfg.Audience = []string{"cloud", "metal"}
+					return cfg
+				}(),
+				rq: func(token string) *http.Request {
+					return &http.Request{
+						Header: createHeader(AuthzHeaderKey, "bearer "+token),
+					}
+				},
+			},
+			wantErr: IssuerNotFound{},
+		},
+		{
 			name: "valid token, multi audience",
 			fields: fields{
 				userExtractorFn: DefaultGenericUserExtractor,
