@@ -8,10 +8,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+
 	"github.com/stretchr/testify/assert"
 
 	"gopkg.in/square/go-jose.v2"
 )
+
+type wantUserFn func(issuer string) *User
 
 func TestGenericOIDC_User(t *testing.T) {
 	type args struct {
@@ -24,7 +28,7 @@ func TestGenericOIDC_User(t *testing.T) {
 	tests := []struct {
 		name                string
 		args                args
-		want                *User
+		want                wantUserFn
 		wantErrAtNew        error
 		wantErrAtUserRegExp error
 	}{
@@ -88,13 +92,16 @@ func TestGenericOIDC_User(t *testing.T) {
 					}
 				},
 			},
-			want: &User{
-				EMail:  "achim@metal-stack.io",
-				Name:   "achim",
-				Groups: []ResourceAccess{"Tn_k8s-all-all-cadm"},
-				Tenant: "XY",
+			want: func(issuer string) *User {
+				return &User{
+					Issuer:  issuer,
+					Subject: defaultTokenSubject,
+					EMail:   defaultTokenEMail,
+					Name:    defaultTokenName,
+					Groups:  []ResourceAccess{"Tn_k8s-all-all-cadm"},
+					Tenant:  "XY",
+				}
 			},
-			wantErrAtNew: nil,
 		},
 		{
 			name: "Malformed Token",
@@ -171,10 +178,13 @@ func TestGenericOIDC_User(t *testing.T) {
 				t.Fatal(err)
 			}
 
+			issuerURL := srv.URL
+
 			ic := tt.args.issuerConfig
 			// path issuer if not explicitly set
 			if ic.Issuer == "" {
-				ic.Issuer = srv.URL
+				url := issuerURL
+				ic.Issuer = url
 			}
 
 			o, err := NewGenericOIDC(ic, Timeout(1*time.Second))
@@ -197,8 +207,15 @@ func TestGenericOIDC_User(t *testing.T) {
 			if err != nil && tt.wantErrAtUserRegExp != nil && !assert.Regexp(t, regexp.MustCompile(tt.wantErrAtUserRegExp.Error()), err.Error()) {
 				t.Fatalf("User() error = %v, wantErr %v", err, tt.wantErrAtUserRegExp)
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("User() got = %v, want %v", got, tt.want)
+
+			var wantUser *User
+			if tt.want != nil {
+				wantUser = tt.want(issuerURL)
+			}
+
+			if !reflect.DeepEqual(got, wantUser) {
+				diff := cmp.Diff(wantUser, got)
+				t.Errorf("User() got = %v, want %v, diff %s", got, wantUser, diff)
 			}
 		})
 	}

@@ -25,33 +25,44 @@ import (
 
 // TokenCfg contains the data for filling the token
 type TokenCfg struct {
-	Alg          jose.SignatureAlgorithm
-	KeyBitlength int
-	IssuerUrl    string
-	Audience     []string
-	ExpiresAt    time.Time
-	IssuedAt     time.Time
-	Id           string
-	Subject      string
-	Name         string
-	Email        string
-	Roles        []string
+	Alg           jose.SignatureAlgorithm
+	KeyBitlength  int
+	IssuerUrl     string
+	Audience      []string
+	ExpiresAt     time.Time
+	IssuedAt      time.Time
+	Id            string
+	Subject       string
+	Name          string
+	PreferredName string
+	Email         string
+	Roles         []string
 }
+
+const (
+	defaultTokenIssuerURL     = "https://oidc.metal-stack.io"
+	defaultTokenSubject       = "AItOawmwtWwcT0k51BayewNvutrJUqsvl6qs7A4"
+	defaultTokenClientID      = "metal-stack"
+	defaultTokenName          = "Achim Admin"
+	defaultTokenEMail         = "achim@metal-stack.io"
+	defaultTokenPreferredName = "xyz4711"
+)
 
 // DefaultTokenCfg creates a TokenCfg filled with default values
 func DefaultTokenCfg() *TokenCfg {
 	return &TokenCfg{
-		Alg:          jose.RS256,
-		KeyBitlength: 0, // use default, i.e. 2048 for RSA
-		IssuerUrl:    "https://oidc.metal-stack.io",
-		Audience:     []string{"metal-stack"},
-		ExpiresAt:    time.Now().Add(5 * time.Minute),
-		IssuedAt:     time.Now(),
-		Id:           "123",
-		Subject:      "AItOawmwtWwcT0k51BayewNvutrJUqsvl6qs7A4",
-		Name:         "achim",
-		Email:        "achim@metal-stack.io",
-		Roles:        []string{"Tn_k8s-all-all-cadm"},
+		Alg:           jose.RS256,
+		KeyBitlength:  0, // use default, i.e. 2048 for RSA
+		IssuerUrl:     defaultTokenIssuerURL,
+		Audience:      []string{defaultTokenClientID},
+		ExpiresAt:     time.Now().Add(5 * time.Minute),
+		IssuedAt:      time.Now(),
+		Id:            "123",
+		Subject:       defaultTokenSubject,
+		Name:          defaultTokenName,
+		PreferredName: defaultTokenPreferredName,
+		Email:         defaultTokenEMail,
+		Roles:         []string{"Tn_k8s-all-all-cadm"},
 	}
 }
 

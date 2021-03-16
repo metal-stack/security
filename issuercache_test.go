@@ -7,6 +7,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 type requestFn func(token string) *http.Request
@@ -100,10 +102,12 @@ func TestIssuerResolver_User(t *testing.T) {
 			},
 			wantUserFn: func(issuerUrl string) *User {
 				return &User{
-					Name:   "achim",
-					EMail:  "achim@metal-stack.io",
-					Groups: []ResourceAccess{"Tn_k8s-all-all-cadm"},
-					Tenant: "Tn",
+					Issuer:  issuerUrl,
+					Subject: defaultTokenSubject,
+					Name:    defaultTokenName,
+					EMail:   defaultTokenEMail,
+					Groups:  []ResourceAccess{"Tn_k8s-all-all-cadm"},
+					Tenant:  "Tn",
 				}
 			},
 			wantErr: nil,
@@ -150,10 +154,12 @@ func TestIssuerResolver_User(t *testing.T) {
 			},
 			wantUserFn: func(issuerUrl string) *User {
 				return &User{
-					Name:   "achim",
-					EMail:  "achim@metal-stack.io",
-					Groups: []ResourceAccess{"Tn_k8s-all-all-cadm"},
-					Tenant: "Tn",
+					Issuer:  issuerUrl,
+					Subject: defaultTokenSubject,
+					Name:    defaultTokenName,
+					EMail:   defaultTokenEMail,
+					Groups:  []ResourceAccess{"Tn_k8s-all-all-cadm"},
+					Tenant:  "Tn",
 				}
 			},
 			wantErr: nil,
@@ -213,7 +219,8 @@ func TestIssuerResolver_User(t *testing.T) {
 				wantUser = tt.wantUserFn(issuer)
 			}
 			if !reflect.DeepEqual(got, wantUser) {
-				t.Errorf("User() got = %v, wantUserFn %v", got, wantUser)
+				diff := cmp.Diff(wantUser, got)
+				t.Errorf("User() got = %v, wantUserFn %v, diff %s", got, wantUser, diff)
 			}
 		})
 	}

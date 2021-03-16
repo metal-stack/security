@@ -3,10 +3,11 @@ package security
 import (
 	"crypto/rsa"
 	"encoding/base64"
-	"github.com/stretchr/testify/assert"
 	"math/big"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/stretchr/testify/require"
 
@@ -316,10 +317,12 @@ func TestDex_UserWithOptions(t *testing.T) {
 					}
 				}
 				usr := User{
-					Name:   "akim",
-					EMail:  claims.EMail,
-					Groups: grps,
-					Tenant: tenant,
+					Issuer:  claims.Issuer,
+					Subject: claims.Subject,
+					Name:    "akim",
+					EMail:   claims.EMail,
+					Groups:  grps,
+					Tenant:  tenant,
 				}
 				return &usr, nil
 			}))
