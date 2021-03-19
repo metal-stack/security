@@ -232,10 +232,12 @@ func defaultUserExtractor(claims *Claims) (*User, error) {
 		}
 	}
 	usr := User{
-		Name:   claims.Name,
-		EMail:  claims.EMail,
-		Groups: grps,
-		Tenant: tenant,
+		Issuer:  claims.Issuer,
+		Subject: claims.Subject,
+		Name:    claims.Name,
+		EMail:   claims.EMail,
+		Groups:  grps,
+		Tenant:  tenant,
 	}
 	return &usr, nil
 }

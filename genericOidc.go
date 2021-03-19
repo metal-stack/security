@@ -16,9 +16,10 @@ import (
 // Audience(s) that this ID Token is intended for. It MUST contain the OAuth 2.0 client_id of the Relying Party as an audience value. It MAY also contain identifiers for other audiences. In the general case, the aud value is an array of case sensitive strings. In the common special case when there is one audience, the aud value MAY be a single case sensitive string.
 type GenericOIDCClaims struct {
 	jwt.Claims
-	Name  string   `json:"name"`
-	EMail string   `json:"email"`
-	Roles []string `json:"roles"`
+	Name              string   `json:"name"`
+	PreferredUsername string   `json:"preferred_username"`
+	EMail             string   `json:"email"`
+	Roles             []string `json:"roles"`
 }
 
 // GenericOIDC is Token Validator and UserGetter for Tokens issued by generic OIDC-Providers.
@@ -147,10 +148,12 @@ func DefaultGenericUserExtractor(ic *IssuerConfig, claims *GenericOIDCClaims) (*
 	}
 
 	usr := User{
-		Name:   claims.Name,
-		EMail:  claims.EMail,
-		Groups: grps,
-		Tenant: ic.Tenant,
+		Issuer:  claims.Issuer,
+		Subject: claims.Subject,
+		Name:    claims.Name,
+		EMail:   claims.EMail,
+		Groups:  grps,
+		Tenant:  ic.Tenant,
 	}
 	return &usr, nil
 }

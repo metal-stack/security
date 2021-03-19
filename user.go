@@ -10,10 +10,12 @@ import (
 
 // A User is the current user who is executing a rest function.
 type User struct {
-	EMail  string
-	Name   string
-	Groups []ResourceAccess
-	Tenant string
+	EMail   string
+	Name    string
+	Groups  []ResourceAccess
+	Tenant  string
+	Issuer  string
+	Subject string
 }
 
 var (
