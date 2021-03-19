@@ -177,8 +177,17 @@ func (i *MultiIssuerCache) updateCache() error {
 	}
 	i.cacheLock.Lock()
 	defer i.cacheLock.Unlock()
+
+	return i.syncCache(ics)
+}
+
+// syncCache syncs the cache with the given list of IssuerConfig,
+// i.e. no longer present entries for tenant-ids get deleted, new entries get added to the cache
+func (i *MultiIssuerCache) syncCache(ics []*IssuerConfig) error {
+
 	// clean map
 	i.cache = make(map[string]*Issuer)
+	// fill cache
 	for _, ic := range ics {
 		i.cache[cacheKey(ic.Issuer, ic.ClientID)] = &Issuer{issuerConfig: ic}
 	}
