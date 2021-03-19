@@ -354,6 +354,12 @@ func TestMultiIssuerCache_syncCache(t *testing.T) {
 						Issuer:      "http://kc.metal-stack/t4-4711",
 						ClientID:    "abc-t4-4711",
 					},
+					{ // this is new
+						Annotations: nil,
+						Tenant:      "t5",
+						Issuer:      "http://kc.metal-stack/t5",
+						ClientID:    "abc-t5-456",
+					},
 				},
 			},
 			wantErr: false,
@@ -377,6 +383,13 @@ func TestMultiIssuerCache_syncCache(t *testing.T) {
 						Tenant:   "t4",
 						Issuer:   "http://kc.metal-stack/t4-4711",
 						ClientID: "abc-t4-4711",
+					},
+				},
+				"abc-t5-456|http://kc.metal-stack/t5": {
+					issuerConfig: &IssuerConfig{
+						Tenant:   "t5",
+						Issuer:   "http://kc.metal-stack/t5",
+						ClientID: "abc-t5-456",
 					},
 				},
 			},

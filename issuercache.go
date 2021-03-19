@@ -224,7 +224,7 @@ func (i *MultiIssuerCache) syncCache(newIcs []*IssuerConfig) error {
 	}
 
 	// add tenants that are not yet present
-	for _, ic := range newIcs {
+	for _, ic := range newTenantIDMap {
 		key := cacheKey(ic.Issuer, ic.ClientID)
 		i.cache[key] = &Issuer{issuerConfig: ic}
 		i.log.Info("syncCache - add tenant to cache", "tenant", ic.Tenant, "key", key)
