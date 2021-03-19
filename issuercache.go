@@ -36,7 +36,7 @@ func NewMultiIssuerCache(ilp IssuerListProvider, ugp UserGetterProvider, opts ..
 		issuerListProvider: ilp,
 		userGetterProvider: ugp,
 		cache:              make(map[string]*Issuer),
-		reloadInterval:     6 * time.Hour,
+		reloadInterval:     30 * time.Minute,
 		log:                logr.DiscardLogger{},
 	}
 
@@ -175,21 +175,59 @@ func (i *MultiIssuerCache) updateCache() error {
 	if err != nil {
 		return err
 	}
-	i.cacheLock.Lock()
-	defer i.cacheLock.Unlock()
 
 	return i.syncCache(ics)
 }
 
 // syncCache syncs the cache with the given list of IssuerConfig,
 // i.e. no longer present entries for tenant-ids get deleted, new entries get added to the cache
-func (i *MultiIssuerCache) syncCache(ics []*IssuerConfig) error {
+func (i *MultiIssuerCache) syncCache(newIcs []*IssuerConfig) error {
 
-	// clean map
-	i.cache = make(map[string]*Issuer)
-	// fill cache
-	for _, ic := range ics {
-		i.cache[cacheKey(ic.Issuer, ic.ClientID)] = &Issuer{issuerConfig: ic}
+	i.cacheLock.Lock()
+	defer i.cacheLock.Unlock()
+
+	// create map for fast tenant lookup by tenant-id and ensure uniqueness
+	newTenantIDMap := make(map[string]*IssuerConfig)
+	for _, ni := range newIcs {
+		_, alreadyThere := newTenantIDMap[ni.Tenant]
+		if alreadyThere {
+			i.log.Info("syncCache - skipping duplicate in new tenant-list", "tenant", ni.Tenant)
+			continue
+		}
+		newTenantIDMap[ni.Tenant] = ni
+	}
+
+	// check if cached tenant-entries must be deleted
+	for cidIssKey, v := range i.cache {
+		// is cached tenant still in new tenant list?
+		tenant := v.issuerConfig.Tenant
+		newTenantConfig, found := newTenantIDMap[tenant]
+		if !found {
+			delete(i.cache, cidIssKey)
+			i.log.Info("syncCache - delete tenant from cache", "tenant", tenant, "key", cidIssKey)
+			continue
+		}
+
+		// found existing cached tenant, check for update
+		newCidIssKey := cacheKey(newTenantConfig.Issuer, newTenantConfig.ClientID)
+		if cidIssKey != newCidIssKey {
+			// issuer/clientID changed for tenant
+			// delete old entry
+			delete(i.cache, cidIssKey)
+			// add new entry
+			i.cache[newCidIssKey] = &Issuer{issuerConfig: newTenantConfig}
+			i.log.Info("syncCache - updated tenant in cache", "tenant", tenant, "key", cidIssKey)
+		}
+
+		// delete entry from newTenantIDMap, as it is already processed
+		delete(newTenantIDMap, tenant)
+	}
+
+	// add tenants that are not yet present
+	for _, ic := range newIcs {
+		key := cacheKey(ic.Issuer, ic.ClientID)
+		i.cache[key] = &Issuer{issuerConfig: ic}
+		i.log.Info("syncCache - add tenant to cache", "tenant", ic.Tenant, "key", key)
 	}
 	return nil
 }

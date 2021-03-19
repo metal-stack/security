@@ -8,6 +8,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
+	"github.com/google/go-cmp/cmp/cmpopts"
+
+	"github.com/stretchr/testify/require"
+
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -228,4 +234,168 @@ func TestIssuerResolver_User(t *testing.T) {
 
 func str2p(s string) *string {
 	return &s
+}
+
+func TestMultiIssuerCache_reload(t *testing.T) {
+	ugp := func(ic *IssuerConfig) (UserGetter, error) {
+		return nil, nil
+	}
+
+	calls := 0
+	issuerList := []*IssuerConfig{}
+
+	ilp := func() ([]*IssuerConfig, error) {
+		calls++
+		return issuerList, nil
+	}
+	ic, err := NewMultiIssuerCache(ilp, ugp, IssuerReloadInterval(1*time.Second))
+	require.NoError(t, err)
+	assert.Equal(t, 1, calls)
+	assert.Equal(t, 0, len(ic.cache))
+
+	// prepare list
+	issuerList = []*IssuerConfig{
+		{
+			Annotations: nil,
+			Tenant:      "t1",
+			Issuer:      "http://issuer/t1",
+			ClientID:    "cli-t1",
+		},
+	}
+	// wait for reload
+	time.Sleep(2 * time.Second)
+
+	assert.Equal(t, 2, calls)
+	assert.Equal(t, 1, len(ic.cache))
+}
+
+func TestMultiIssuerCache_syncCache(t *testing.T) {
+	type fields struct {
+		ilp  IssuerListProvider
+		ugp  UserGetterProvider
+		opts []MultiIssuerUserGetterOption
+	}
+	type args struct {
+		newIcs []*IssuerConfig
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+		want    map[string]*Issuer
+	}{
+		{
+			name: "Update initial existing t1",
+			fields: fields{
+				ilp: func() ([]*IssuerConfig, error) {
+					return []*IssuerConfig{
+						{
+							Annotations: nil,
+							Tenant:      "t1",
+							Issuer:      "http://kc.metal-stack/t1",
+							ClientID:    "xyz-t1-123",
+						},
+						{
+							Annotations: nil,
+							Tenant:      "t2",
+							Issuer:      "http://kc.metal-stack/t2",
+							ClientID:    "abc-t2-456",
+						},
+						{
+							Annotations: nil,
+							Tenant:      "t3",
+							Issuer:      "http://kc.metal-stack/t3",
+							ClientID:    "abc-t3-456",
+						},
+						{
+							Annotations: nil,
+							Tenant:      "t4",
+							Issuer:      "http://kc.metal-stack/t4",
+							ClientID:    "abc-t4-456",
+						},
+						{ // duplicate tenants get filtered - but we don't know which of the two
+							Annotations: nil,
+							Tenant:      "t4",
+							Issuer:      "http://kc.metal-stack/t4",
+							ClientID:    "abc-t4-456",
+						},
+					}, nil
+				},
+				ugp: func(ic *IssuerConfig) (UserGetter, error) {
+					return nil, nil
+				},
+				opts: nil,
+			},
+			args: args{
+				newIcs: []*IssuerConfig{
+					{ // updates existing
+						Annotations: nil,
+						Tenant:      "t1",
+						Issuer:      "http://kc.metal-stack/t1x",
+						ClientID:    "xyz-t1-123s",
+					},
+					{ // is unaltered
+						Annotations: nil,
+						Tenant:      "t2",
+						Issuer:      "http://kc.metal-stack/t2",
+						ClientID:    "abc-t2-456",
+					},
+					// t3 is not there anymore, gets deleted
+					{ // duplicates get filtered, but we don't know which
+						Annotations: nil,
+						Tenant:      "t4",
+						Issuer:      "http://kc.metal-stack/t4-4711",
+						ClientID:    "abc-t4-4711",
+					},
+					{ // duplicates get filtered, but we don't know which
+						Annotations: nil,
+						Tenant:      "t4",
+						Issuer:      "http://kc.metal-stack/t4-4711",
+						ClientID:    "abc-t4-4711",
+					},
+				},
+			},
+			wantErr: false,
+			want: map[string]*Issuer{
+				"xyz-t1-123s|http://kc.metal-stack/t1x": {
+					issuerConfig: &IssuerConfig{
+						Tenant:   "t1",
+						Issuer:   "http://kc.metal-stack/t1x",
+						ClientID: "xyz-t1-123s",
+					},
+				},
+				"abc-t2-456|http://kc.metal-stack/t2": {
+					issuerConfig: &IssuerConfig{
+						Tenant:   "t2",
+						Issuer:   "http://kc.metal-stack/t2",
+						ClientID: "abc-t2-456",
+					},
+				},
+				"abc-t4-4711|http://kc.metal-stack/t4-4711": {
+					issuerConfig: &IssuerConfig{
+						Tenant:   "t4",
+						Issuer:   "http://kc.metal-stack/t4-4711",
+						ClientID: "abc-t4-4711",
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			i, err := NewMultiIssuerCache(tt.fields.ilp, tt.fields.ugp)
+			require.NoError(t, err)
+			if err := i.syncCache(tt.args.newIcs); (err != nil) != tt.wantErr {
+				t.Errorf("syncCache() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if tt.want != nil {
+				diff := cmp.Diff(tt.want, i.cache, cmp.AllowUnexported(Issuer{}), cmpopts.IgnoreFields(Issuer{}, "ugOnce"))
+				if diff != "" {
+					t.Errorf("cache is = %v, want %v, diff %s", i.cache, tt.want, diff)
+				}
+			}
+		})
+	}
 }
