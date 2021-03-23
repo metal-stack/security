@@ -93,9 +93,10 @@ func CreateTokenAndKeys(cfg *TokenCfg) (token string, pubKey jose.JSONWebKey, pr
 	}
 
 	pcl := GenericOIDCClaims{
-		Name:  cfg.Name,
-		EMail: cfg.Email,
-		Roles: cfg.Roles,
+		Name:              cfg.Name,
+		PreferredUsername: cfg.PreferredName,
+		EMail:             cfg.Email,
+		Roles:             cfg.Roles,
 	}
 
 	signer := MustMakeSigner(cfg.Alg, privKey)

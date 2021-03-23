@@ -97,6 +97,39 @@ func TestGenericOIDC_User(t *testing.T) {
 					Issuer:  issuer,
 					Subject: defaultTokenSubject,
 					EMail:   defaultTokenEMail,
+					Name:    defaultTokenPreferredName,
+					Groups:  []ResourceAccess{"Tn_k8s-all-all-cadm"},
+					Tenant:  "XY",
+				}
+			},
+		},
+		{
+			name: "All good, name only",
+			args: args{
+				tokenCfg: func() *TokenCfg {
+					t := DefaultTokenCfg()
+					t.PreferredName = ""
+					return t
+				}(),
+				issuerConfig: &IssuerConfig{
+					Tenant:   "XY",
+					Issuer:   "", // will automagically be filled if empty
+					ClientID: "metal-stack",
+				},
+				tokenProvider: func(cfg *TokenCfg) (string, jose.JSONWebKey, jose.JSONWebKey) {
+					return MustCreateTokenAndKeys(cfg)
+				},
+				requestFn: func(token string) *http.Request {
+					return &http.Request{
+						Header: createHeader(AuthzHeaderKey, "Bearer "+token),
+					}
+				},
+			},
+			want: func(issuer string) *User {
+				return &User{
+					Issuer:  issuer,
+					Subject: defaultTokenSubject,
+					EMail:   defaultTokenEMail,
 					Name:    defaultTokenName,
 					Groups:  []ResourceAccess{"Tn_k8s-all-all-cadm"},
 					Tenant:  "XY",

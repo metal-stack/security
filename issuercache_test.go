@@ -110,7 +110,7 @@ func TestIssuerResolver_User(t *testing.T) {
 				return &User{
 					Issuer:  issuerUrl,
 					Subject: defaultTokenSubject,
-					Name:    defaultTokenName,
+					Name:    defaultTokenPreferredName,
 					EMail:   defaultTokenEMail,
 					Groups:  []ResourceAccess{"Tn_k8s-all-all-cadm"},
 					Tenant:  "Tn",
@@ -162,7 +162,7 @@ func TestIssuerResolver_User(t *testing.T) {
 				return &User{
 					Issuer:  issuerUrl,
 					Subject: defaultTokenSubject,
-					Name:    defaultTokenName,
+					Name:    defaultTokenPreferredName,
 					EMail:   defaultTokenEMail,
 					Groups:  []ResourceAccess{"Tn_k8s-all-all-cadm"},
 					Tenant:  "Tn",
