@@ -22,6 +22,13 @@ type GenericOIDCClaims struct {
 	Roles             []string `json:"roles"`
 }
 
+func (g *GenericOIDCClaims) Username() string {
+	if g.PreferredUsername != "" {
+		return g.PreferredUsername
+	}
+	return g.Name
+}
+
 // GenericOIDC is Token Validator and UserGetter for Tokens issued by generic OIDC-Providers.
 type GenericOIDC struct {
 	issuerConfig    *IssuerConfig
@@ -150,7 +157,7 @@ func DefaultGenericUserExtractor(ic *IssuerConfig, claims *GenericOIDCClaims) (*
 	usr := User{
 		Issuer:  claims.Issuer,
 		Subject: claims.Subject,
-		Name:    claims.Name,
+		Name:    claims.Username(),
 		EMail:   claims.EMail,
 		Groups:  grps,
 		Tenant:  ic.Tenant,

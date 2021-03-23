@@ -24,16 +24,17 @@ func TestCreateTokenAndKeys(t *testing.T) {
 
 			clientID := "myClient"
 			tc := &TokenCfg{
-				Alg:       alg,
-				IssuerUrl: "http://metal-stack.io",
-				Audience:  jwt.Audience{"aud1", "aud2", clientID},
-				ExpiresAt: time.Now().Add(5 * time.Minute),
-				IssuedAt:  time.Now(),
-				Id:        "#123abc",
-				Subject:   "theSubject",
-				Name:      "theName",
-				Email:     "me@metal-stack.io",
-				Roles:     []string{"role1", "r-o-l-e-2", "r$o$l$e-3"},
+				Alg:           alg,
+				IssuerUrl:     "http://metal-stack.io",
+				Audience:      jwt.Audience{"aud1", "aud2", clientID},
+				ExpiresAt:     time.Now().Add(5 * time.Minute),
+				IssuedAt:      time.Now(),
+				Id:            "#123abc",
+				Subject:       "theSubject",
+				Name:          "theName",
+				PreferredName: "thePreferredName",
+				Email:         "me@metal-stack.io",
+				Roles:         []string{"role1", "r-o-l-e-2", "r$o$l$e-3"},
 			}
 
 			srv, token, err := GenerateTokenAndKeyServer(tc, func(cfg *TokenCfg) (string, jose.JSONWebKey, jose.JSONWebKey) {
@@ -66,7 +67,7 @@ func TestCreateTokenAndKeys(t *testing.T) {
 			}
 
 			assert.Equal(t, u.Tenant, "Tn")
-			assert.Equal(t, u.Name, tc.Name)
+			assert.Equal(t, u.Name, tc.PreferredName)
 			assert.Equal(t, u.EMail, tc.Email)
 
 			var rr []ResourceAccess
