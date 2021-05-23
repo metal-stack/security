@@ -2,15 +2,18 @@ package security
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"flag"
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestMain(m *testing.M) {
@@ -24,7 +27,7 @@ func TestMain(m *testing.M) {
 func TestAddAuth(t *testing.T) {
 	// Use the authtype 'mytype' and the shared key (1,2,3)
 	hm := NewHMACAuth("mytype", []byte{1, 2, 3})
-	rq, _ := http.NewRequest(http.MethodGet, "/myurl", nil)
+	rq, _ := http.NewRequestWithContext(context.Background(), http.MethodGet, "/myurl", nil)
 	ts := time.Date(2019, time.January, 16, 14, 44, 45, 123, time.UTC)
 	// now add a HMCA with the given date and the body {4,5,6}
 	hm.AddAuth(rq, ts, []byte{4, 5, 6})
@@ -126,6 +129,7 @@ func TestHMACAuth_User(t *testing.T) {
 			auth: authtype + " 1234567",
 			ts:   tm.Format(time.RFC3339),
 			errcheck: func(t *testing.T, e error) {
+				//nolint:errorlint
 				_, ok := e.(*WrongHMAC)
 				if !ok {
 					t.Fatalf("the error is not a wrong hmac")
@@ -169,6 +173,7 @@ func TestHMACAuth_User(t *testing.T) {
 	}
 
 	for _, st := range testdata {
+		st := st
 		t.Run(st.name, func(t *testing.T) {
 			hm := NewHMACAuth(
 				authtype,
@@ -189,7 +194,7 @@ func TestHMACAuth_User(t *testing.T) {
 				st.errcheck(t, err)
 				return
 			}
-			if st.err != err {
+			if !errors.Is(st.err, err) {
 				t.Fatalf("the error %q is unexpected, we wanted: %q", err, st.err)
 			}
 
@@ -262,6 +267,7 @@ func TestMacCalc2(t *testing.T) {
 		},
 	}
 	for _, td := range testdata {
+		td := td
 		t.Run(td.name, func(t *testing.T) {
 			u := User{Name: td.user}
 			hm := NewHMACAuth(td.user, []byte(td.hmac), WithUser(u))

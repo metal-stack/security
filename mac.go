@@ -186,7 +186,7 @@ func (hma *HMACAuth) UserFromRequestData(requestData RequestData) (*User, error)
 	hm := strings.TrimSpace(splitToken[1])
 	ts, err := time.Parse(time.RFC3339, t)
 	if err != nil {
-		return nil, fmt.Errorf("unknown timestamp %q in %q header, use RFC3339: %v", t, TsHeaderKey, err)
+		return nil, fmt.Errorf("unknown timestamp %q in %q header, use RFC3339: %w", t, TsHeaderKey, err)
 	}
 	if hma.Lifetime > 0 {
 		if time.Since(ts) > hma.Lifetime {
@@ -225,6 +225,7 @@ func randomByteString(n int) []byte {
 }
 
 // create a math/random with a secure source to get real random numbers
+//nolint:gosec
 var secureRand = rand.New(src)
 var src cryptoSource
 

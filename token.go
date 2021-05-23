@@ -40,10 +40,13 @@ type TokenCfg struct {
 }
 
 const (
-	defaultTokenIssuerURL     = "https://oidc.metal-stack.io"
-	defaultTokenSubject       = "AItOawmwtWwcT0k51BayewNvutrJUqsvl6qs7A4"
-	defaultTokenClientID      = "metal-stack"
-	defaultTokenName          = "Achim Admin"
+	//nolint:gosec
+	defaultTokenIssuerURL = "https://oidc.metal-stack.io"
+	//nolint:gosec
+	defaultTokenSubject  = "AItOawmwtWwcT0k51BayewNvutrJUqsvl6qs7A4"
+	defaultTokenClientID = "metal-stack"
+	defaultTokenName     = "Achim Admin"
+	//nolint:gosec
 	defaultTokenEMail         = "achim@metal-stack.io"
 	defaultTokenPreferredName = "xyz4711"
 )
@@ -256,6 +259,8 @@ func GenerateSigningKey(alg jose.SignatureAlgorithm, bits int) (crypto.PublicKey
 		if bits < 2048 {
 			return nil, nil, errors.New("invalid key size for RSA key, 2048 or more is required")
 		}
+	case jose.HS256, jose.HS384, jose.HS512:
+		return nil, nil, fmt.Errorf("unsupported algorithm %s for signing key", alg)
 	}
 	switch alg {
 	case jose.ES256:
@@ -285,6 +290,8 @@ func GenerateSigningKey(alg jose.SignatureAlgorithm, bits int) (crypto.PublicKey
 			return nil, nil, err
 		}
 		return key.Public(), key, err
+	case jose.HS256, jose.HS384, jose.HS512:
+		return nil, nil, fmt.Errorf("unsupported algorithm %s for signing key", alg)
 	default:
 		return nil, nil, fmt.Errorf("unknown algorithm %s for signing key", alg)
 	}

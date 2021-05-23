@@ -172,6 +172,8 @@ func TestIssuerResolver_User(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
+
 		t.Run(tt.name, func(t *testing.T) {
 
 			var srv *httptest.Server
@@ -396,6 +398,7 @@ func TestMultiIssuerCache_syncCache(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 
 			i, err := NewMultiIssuerCache(tt.fields.ilp, tt.fields.ugp)

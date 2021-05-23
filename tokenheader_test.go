@@ -73,6 +73,7 @@ func Test_ExtractBearer(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := ExtractBearer(tt.rq)
 			if (err != nil) != tt.wantErr {
@@ -138,6 +139,7 @@ func Test_ParseTokenClaimsUnvalidated(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := ParseTokenClaimsUnvalidated(tt.rq)
 			if (err != nil) != tt.wantErr {

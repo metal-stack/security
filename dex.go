@@ -115,7 +115,7 @@ func (dx *Dex) keyfetcher() error {
 	dx.update = make(chan updater)
 	keys, err := jwk.Fetch(dx.baseURL + "/keys")
 	if err != nil {
-		return fmt.Errorf("cannot fetch dex keys from %s/keys: %v", dx.baseURL, err)
+		return fmt.Errorf("cannot fetch dex keys from %s/keys: %w", dx.baseURL, err)
 	}
 	t := time.NewTicker(dx.refreshInterval)
 	go func() {
@@ -126,9 +126,9 @@ func (dx *Dex) keyfetcher() error {
 			case keyRQ := <-c:
 				keyRQ.rsp <- keyRsp{keys, err}
 			case <-t.C:
-				keys, err = dx.updateKeys(keys, fmt.Sprintf("Timer: %s", dx.refreshInterval))
+				keys, err = dx.updateKeys(keys)
 			case u := <-dx.update:
-				keys, err = dx.updateKeys(keys, "forced update")
+				keys, err = dx.updateKeys(keys)
 				u.updated <- keys
 			}
 		}
@@ -155,10 +155,10 @@ func (dx *Dex) forceUpdate() {
 	<-u.updated
 }
 
-func (dx *Dex) updateKeys(old *jwk.Set, reason string) (*jwk.Set, error) {
+func (dx *Dex) updateKeys(old *jwk.Set) (*jwk.Set, error) {
 	k, e := jwk.Fetch(dx.baseURL + "/keys")
 	if e != nil {
-		return old, fmt.Errorf("cannot fetch dex keys from %s/keys: %v", dx.baseURL, e)
+		return old, fmt.Errorf("cannot fetch dex keys from %s/keys: %w", dx.baseURL, e)
 	}
 	return k, e
 }

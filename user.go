@@ -1,6 +1,7 @@
 package security
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -109,7 +110,7 @@ func (uc *UserCreds) User(rq *http.Request) (*User, error) {
 		if err == nil {
 			return u, nil
 		}
-		if err != errNoAuthFound && err != errIllegalAuthFound && err != errUnknownAuthFound {
+		if !errors.Is(err, errNoAuthFound) && !errors.Is(err, errIllegalAuthFound) && !errors.Is(err, errUnknownAuthFound) {
 			return nil, err
 		}
 	}
