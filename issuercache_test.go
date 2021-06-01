@@ -23,6 +23,10 @@ type requestFn func(token string) *http.Request
 type userFn func(issuerUrl string) *User
 
 func TestIssuerResolver_User(t *testing.T) {
+
+	// Ensure we are safe for different locations of issuer and enforcing infrastructure
+	os.Setenv("TZ", "UTC")
+
 	type fields struct {
 		userExtractorFn GenericUserExtractorFn
 		tokenFn         TokenProvider
@@ -83,7 +87,7 @@ func TestIssuerResolver_User(t *testing.T) {
 				},
 				tokenCfg: func() *TokenCfg {
 					c := DefaultTokenCfg()
-					exp, err := time.Parse("2006-01-02 15:04:05 -0700 MST", "2021-02-03 10:03:41 +0100 CET")
+					exp, err := time.Parse("2006-01-02 15:04:05 -0700 MST", "2021-02-03 09:03:41 +0000 UTC")
 					if err != nil {
 						panic(err)
 					}
@@ -92,7 +96,7 @@ func TestIssuerResolver_User(t *testing.T) {
 				}(),
 			},
 			wantUserFn: nil,
-			wantErr:    errors.New("oidc: token is expired (Token Expiry: 2021-02-03 10:03:41 +0100 CET)"),
+			wantErr:    errors.New("oidc: token is expired (Token Expiry: 2021-02-03 09:03:41 +0000 UTC)"),
 		},
 		{
 			name: "valid token",
@@ -174,8 +178,6 @@ func TestIssuerResolver_User(t *testing.T) {
 	}
 	for _, tt := range tests {
 		tt := tt
-		// Ensure we are save for different locations of issuer and enforcing infrastructure
-		os.Setenv("TZ", "UTC")
 		t.Run(tt.name, func(t *testing.T) {
 
 			var srv *httptest.Server
