@@ -83,7 +83,7 @@ func TestIssuerResolver_User(t *testing.T) {
 				},
 				tokenCfg: func() *TokenCfg {
 					c := DefaultTokenCfg()
-					exp, err := time.Parse("2006-01-02 15:04:05", "2021-02-03 09:03:41")
+					exp, err := time.Parse("2006-01-02 15:04:05 -0700 MST", "2021-02-03 10:03:41 +0100 CET")
 					if err != nil {
 						panic(err)
 					}
