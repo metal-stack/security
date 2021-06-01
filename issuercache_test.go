@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -173,7 +174,8 @@ func TestIssuerResolver_User(t *testing.T) {
 	}
 	for _, tt := range tests {
 		tt := tt
-
+		// Ensure we are save for different locations of issuer and enforcing infrastructure
+		os.Setenv("TZ", "UTC")
 		t.Run(tt.name, func(t *testing.T) {
 
 			var srv *httptest.Server
