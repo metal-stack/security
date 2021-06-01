@@ -132,13 +132,20 @@ func TestDex_keyfetcher(t *testing.T) {
 			return
 		}
 
-		// FIXME ???
-		// for i, k := range keys.Keys {
-		// 	kid := d[i]["kid"].(string)
-		// 	if k.KeyID() != kid {
-		// 		t.Errorf("got KeyID: %q, want %q", k.KeyID(), kid)
-		// 	}
-		// }
+		for i := 0; i < keys.Len(); i++ {
+			k, ok := keys.Get(i)
+			if !ok {
+				t.Errorf("unable to fetch key with id:%d", i)
+			}
+			keyID, ok := k.Get("kid")
+			if !ok {
+				t.Errorf("unable to fetch key ID with id:%d", i)
+			}
+			if keyID != k.KeyID() {
+				t.Errorf("got KeyID: %q, want %q", keyID, k.KeyID())
+			}
+		}
+
 		k, err := dx.searchKey(searchkey)
 		if err != nil {
 			t.Errorf("the key %q could not be retrieved: %v", searchkey, err)
