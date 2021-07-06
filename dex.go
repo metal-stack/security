@@ -1,13 +1,14 @@
 package security
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"github.com/lestrrat-go/jwx/jwk"
 )
 
@@ -16,7 +17,7 @@ const (
 )
 
 type updater struct {
-	updated chan *jwk.Set
+	updated chan jwk.Set
 }
 
 // A Dex ...
@@ -32,7 +33,7 @@ type Dex struct {
 }
 
 type keyRsp struct {
-	keys *jwk.Set
+	keys jwk.Set
 	err  error
 }
 type keyRQ struct {
@@ -113,9 +114,9 @@ func (dx *Dex) keyfetcher() error {
 	c := make(chan keyRQ)
 	dx.keys = c
 	dx.update = make(chan updater)
-	keys, err := jwk.Fetch(dx.baseURL + "/keys")
+	keys, err := jwk.Fetch(context.Background(), dx.baseURL+"/keys")
 	if err != nil {
-		return fmt.Errorf("cannot fetch dex keys from %s/keys: %v", dx.baseURL, err)
+		return fmt.Errorf("cannot fetch dex keys from %s/keys: %w", dx.baseURL, err)
 	}
 	t := time.NewTicker(dx.refreshInterval)
 	go func() {
@@ -126,9 +127,9 @@ func (dx *Dex) keyfetcher() error {
 			case keyRQ := <-c:
 				keyRQ.rsp <- keyRsp{keys, err}
 			case <-t.C:
-				keys, err = dx.updateKeys(keys, fmt.Sprintf("Timer: %s", dx.refreshInterval))
+				keys, err = dx.updateKeys(keys)
 			case u := <-dx.update:
-				keys, err = dx.updateKeys(keys, "forced update")
+				keys, err = dx.updateKeys(keys)
 				u.updated <- keys
 			}
 		}
@@ -137,7 +138,7 @@ func (dx *Dex) keyfetcher() error {
 }
 
 // fetchKeys asks the current keyfetcher to give the current keyset
-func (dx *Dex) fetchKeys() (*jwk.Set, error) {
+func (dx *Dex) fetchKeys() (jwk.Set, error) {
 	outchan := make(chan keyRsp)
 	krq := keyRQ{rsp: outchan}
 	defer close(krq.rsp)
@@ -148,17 +149,17 @@ func (dx *Dex) fetchKeys() (*jwk.Set, error) {
 
 func (dx *Dex) forceUpdate() {
 	u := updater{
-		updated: make(chan *jwk.Set),
+		updated: make(chan jwk.Set),
 	}
 	defer close(u.updated)
 	dx.update <- u
 	<-u.updated
 }
 
-func (dx *Dex) updateKeys(old *jwk.Set, reason string) (*jwk.Set, error) {
-	k, e := jwk.Fetch(dx.baseURL + "/keys")
+func (dx *Dex) updateKeys(old jwk.Set) (jwk.Set, error) {
+	k, e := jwk.Fetch(context.Background(), dx.baseURL+"/keys")
 	if e != nil {
-		return old, fmt.Errorf("cannot fetch dex keys from %s/keys: %v", dx.baseURL, e)
+		return old, fmt.Errorf("cannot fetch dex keys from %s/keys: %w", dx.baseURL, e)
 	}
 	return k, e
 }
@@ -171,13 +172,13 @@ func (dx *Dex) searchKey(kid string) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		jwtkeys := keys.LookupKeyID(kid)
-		if len(jwtkeys) == 0 {
+		jwtkey, ok := keys.LookupKeyID(kid)
+		if !ok {
 			dx.forceUpdate()
 			continue
 		}
 		var key interface{}
-		err = jwtkeys[0].Raw(&key)
+		err = jwtkey.Raw(&key)
 		return key, err
 	}
 	return nil, fmt.Errorf("key %q not found", kid)

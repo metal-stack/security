@@ -19,11 +19,13 @@ func ParseTokenClaimsUnvalidated(req *http.Request) (*jwt.Claims, error) {
 	parsedClaims := &jwt.Claims{}
 	webToken, err := jwt.ParseSigned(tokenString)
 	if err != nil {
+		//nolint
 		return nil, fmt.Errorf("error parsing token: %s", err)
 	}
 
 	err = webToken.UnsafeClaimsWithoutVerification(parsedClaims)
 	if err != nil {
+		//nolint
 		return nil, fmt.Errorf("error parsing token claims: %s", err)
 	}
 

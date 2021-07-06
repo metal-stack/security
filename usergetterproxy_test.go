@@ -15,7 +15,7 @@ func TestUserGetterProxy_IllegalToken(t *testing.T) {
 		Header: createHeader(AuthzHeaderKey, "bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImQ5ODcxMzYxLTEzMjktNGVhMi1iZDM5LTdlNTRiMzE4MGE2NCJ9.eyJhdWQiOlsibWV0YWwtc3RhY2siXSwiZW1haWwiOiJhY2hpbUBtZXRhbC1zdGFjay5pbyIsImV4cCI6MTYxMzM4NTI5OSwiaWF0IjoxNjEzMzg0OTk5LCJpc3MiOiJodHRwczovL29pZGMubWV0YWwtc3RhY2suaW8iLCJqdGkiOiIxMjMiLCJuYW1lIjoiYWNoaW0iLCJuYmYiOjE2MTMzODQ5OTksInJvbGVzIjpbIlRuX2s4cy1hbGwtYWxsLWNhZG0iXSwic3ViIjoiQUl0T2F3bXd0V3djVDBrNTFCYXlld052dXRySlVxc3ZsNnFzN0E0In0.RyN6KuLqhN82q8YVXjXSIyMRfCdIdhuwlK2gXcPgwbJ590--xw3fAzr3Esxt_m3-VwV-4xvRoD8u1Yl5K6MuGirJt24dKZl_qk0CzV3DUF-3nL5NHJ-NVBBLcrQdF7OGu14XMYciuuT6pFNi930lV-P_OQv3Mqrauai6PaAres-k6LaIHw9iF6FeUO8Otwt4XcQknd9bMn6jsAUftWwacuY71uSXThpGZWIA__byGG1KAcXT85Bxa-NvRLYjndbYUYhIGB5VZDLk6U0q4Ok_QyN4HOX48-trsdtEVRNufQz8Xq4YrPkx-UvEbKIOcmAYUuo4BhjBDkYojg3D5tf7knNzeAooQuwgFX7Q4YI3wSc2gcsZi7T73N_C3qsH0njzY39mN_nwVsIqhZHga2ILszQ3fak7bLU5TDS73nMRtsHyU3JgyJsOQfe-iAtnllLmZQsVF2gnfaj4AEgwCDZmrxF8hCc4Bc5FfKPGmbNfS3qdP-9sPrFfdXRD-aZxPWbI6wpl_TMSHXmIaUYkfGnenpyI8Tll6VnKyL8NOlmxnxW9UQ39zbUPcw3TTgEXk_oay1YqeYeYNmyUvICbm2EAM9EsHBFdeOEuHXiNYkKZKpb_FjGgbEFX_qhxnXUsXgSM6AmyErxPz123RbeQv4X5MDceT3eiFUnZi8q_vzvIgU9Mk"),
 	}
 	_, err := p.User(rq)
-	assert.Equal(t, err, errors.New("error parsing token: illegal base64 data at input byte 684"))
+	assert.Equal(t, errors.New("error parsing token: illegal base64 data at input byte 684"), err)
 }
 
 func TestUserGetterProxy_User(t *testing.T) {
@@ -61,6 +61,7 @@ func TestUserGetterProxy_User(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 
 			rq := &http.Request{
