@@ -204,7 +204,7 @@ func (i *MultiIssuerCache) syncCache(newIcs []*IssuerConfig) error {
 		newTenantConfig, found := newTenantIDMap[tenant]
 		if !found {
 			delete(i.cache, cidIssKey)
-			i.log.Info("syncCache - delete tenant from cache", "tenant", tenant, "key", cidIssKey, "annotations", newTenantConfig.Annotations)
+			i.log.Info("syncCache - delete tenant from cache", "tenant", tenant, "key", cidIssKey)
 			continue
 		}
 
