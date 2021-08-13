@@ -208,6 +208,9 @@ func (i *MultiIssuerCache) syncCache(newIcs []*IssuerConfig) error {
 			continue
 		}
 
+		// update the annotations always
+		v.issuerConfig.Annotations = newTenantConfig.Annotations
+
 		// found existing cached tenant, check for update
 		newCidIssKey := cacheKey(newTenantConfig.Issuer, newTenantConfig.ClientID)
 		if cidIssKey != newCidIssKey {
@@ -225,7 +228,6 @@ func (i *MultiIssuerCache) syncCache(newIcs []*IssuerConfig) error {
 
 	// add tenants that are not yet present
 	for _, ic := range newTenantIDMap {
-		ic := ic
 		key := cacheKey(ic.Issuer, ic.ClientID)
 		i.cache[key] = &Issuer{issuerConfig: ic}
 		i.log.Info("syncCache - add tenant to cache", "tenant", ic.Tenant, "key", key, "annotations", ic.Annotations)
