@@ -205,7 +205,7 @@ func (i *MultiIssuerCache) syncCache(newIcs []*IssuerConfig) error {
 		newTenantConfig, found := newTenantIDMap[tenant]
 		if !found {
 			delete(i.cache, cidIssKey)
-			i.log.Info("syncCache - delete tenant from cache", "tenant", tenant, "key", cidIssKey)
+			i.log.Info("syncCache - delete tenant from cache", "tenant", tenant, "key", cidIssKey, "annotations", newTenantConfig.Annotations)
 			continue
 		}
 
@@ -217,7 +217,7 @@ func (i *MultiIssuerCache) syncCache(newIcs []*IssuerConfig) error {
 			delete(i.cache, cidIssKey)
 			// add new entry
 			i.cache[newCidIssKey] = &Issuer{issuerConfig: newTenantConfig}
-			i.log.Info("syncCache - updated tenant in cache", "tenant", tenant, "key", cidIssKey)
+			i.log.Info("syncCache - updated tenant in cache", "tenant", tenant, "key", cidIssKey, "annotations", newTenantConfig.Annotations)
 		}
 
 		// delete entry from newTenantIDMap, as it is already processed
@@ -228,7 +228,7 @@ func (i *MultiIssuerCache) syncCache(newIcs []*IssuerConfig) error {
 	for _, ic := range newTenantIDMap {
 		key := cacheKey(ic.Issuer, ic.ClientID)
 		i.cache[key] = &Issuer{issuerConfig: ic}
-		i.log.Info("syncCache - add tenant to cache", "tenant", ic.Tenant, "key", key)
+		i.log.Info("syncCache - add tenant to cache", "tenant", ic.Tenant, "key", key, "annotations", ic.Annotations)
 	}
 	return nil
 }
