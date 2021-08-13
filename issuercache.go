@@ -189,10 +189,9 @@ func (i *MultiIssuerCache) syncCache(newIcs []*IssuerConfig) error {
 	// create map for fast tenant lookup by tenant-id and ensure uniqueness
 	newTenantIDMap := make(map[string]*IssuerConfig)
 	for _, ni := range newIcs {
-		entry, alreadyThere := newTenantIDMap[ni.Tenant]
+		_, alreadyThere := newTenantIDMap[ni.Tenant]
 		if alreadyThere {
-			i.log.Info("syncCache - entry in tenant-list already exists, only updating annotations", "tenant", ni.Tenant)
-			entry.Annotations = ni.Annotations
+			i.log.Info("syncCache - skipping duplicate in new tenant-list", "tenant", ni.Tenant)
 			continue
 		}
 		newTenantIDMap[ni.Tenant] = ni
@@ -226,6 +225,7 @@ func (i *MultiIssuerCache) syncCache(newIcs []*IssuerConfig) error {
 
 	// add tenants that are not yet present
 	for _, ic := range newTenantIDMap {
+		ic := ic
 		key := cacheKey(ic.Issuer, ic.ClientID)
 		i.cache[key] = &Issuer{issuerConfig: ic}
 		i.log.Info("syncCache - add tenant to cache", "tenant", ic.Tenant, "key", key, "annotations", ic.Annotations)
