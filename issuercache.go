@@ -37,7 +37,7 @@ func NewMultiIssuerCache(ilp IssuerListProvider, ugp UserGetterProvider, opts ..
 		userGetterProvider: ugp,
 		cache:              make(map[string]*Issuer),
 		reloadInterval:     30 * time.Minute,
-		log:                logr.DiscardLogger{},
+		log:                logr.Discard(),
 	}
 
 	for _, opt := range opts {
