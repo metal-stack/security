@@ -197,6 +197,11 @@ func (dx *Dex) User(rq *http.Request) (*User, error) {
 	}
 	bearerToken := strings.TrimSpace(splitToken[1])
 
+	return dx.UserFromToken(bearerToken)
+}
+
+// UserFromToken implements the UserGetter to get a user from the token.
+func (dx *Dex) UserFromToken(bearerToken string) (*User, error) {
 	token, err := jwt.ParseWithClaims(bearerToken, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		alg, ok := token.Header["alg"].(string)
 		if !ok {

@@ -145,6 +145,9 @@ func (i *MultiIssuerCache) User(rq *http.Request) (*User, error) {
 
 	return iss.userGetter.User(rq)
 }
+func (i *MultiIssuerCache) UserFromToken(token string) (*User, error) {
+	return nil, fmt.Errorf("UserFromToken is unsupported in issuercache")
+}
 
 type Issuer struct {
 	issuerConfig *IssuerConfig
