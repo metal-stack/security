@@ -92,16 +92,19 @@ func NewGenericOIDC(ic *IssuerConfig, opts ...GenericOIDCOption) (*GenericOIDC, 
 
 // User implements the UserGetter to get a user from the request.
 func (o *GenericOIDC) User(rq *http.Request) (*User, error) {
-
-	ctx := context.Background()
-
 	rawIDToken, err := ExtractBearer(rq)
 	if err != nil {
 		return nil, err
 	}
+	return o.UserFromToken(rawIDToken)
+}
+
+// User implements the UserGetter to get a user from the request.
+func (o *GenericOIDC) UserFromToken(token string) (*User, error) {
+	ctx := context.Background()
 
 	// Parse and verify ID Token payload.
-	idToken, err := o.verifier.Verify(ctx, rawIDToken)
+	idToken, err := o.verifier.Verify(ctx, token)
 	if err != nil {
 		return nil, err
 	}
