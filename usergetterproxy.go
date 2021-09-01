@@ -1,6 +1,10 @@
 package security
 
-import "net/http"
+import (
+	"net/http"
+
+	jose "gopkg.in/square/go-jose.v2/jwt"
+)
 
 // UserGetterProxy switches between UserGetters depending on issuer/clientid of the token in the request.
 type UserGetterProxy struct {
@@ -40,6 +44,26 @@ func (u *UserGetterProxy) User(rq *http.Request) (*User, error) {
 		return nil, err
 	}
 
+	ug, err := u.userFromClaims(claims)
+	if err != nil {
+		return nil, err
+	}
+	return ug.User(rq)
+}
+
+func (u *UserGetterProxy) UserFromToken(token string) (*User, error) {
+	claims, err := ParseRawTokenClaimsUnvalidated(token)
+	if err != nil {
+		return nil, err
+	}
+	ug, err := u.userFromClaims(claims)
+	if err != nil {
+		return nil, err
+	}
+	return ug.UserFromToken(token)
+}
+
+func (u *UserGetterProxy) userFromClaims(claims *jose.Claims) (UserGetter, error) {
 	issuer := claims.Issuer
 	aud := claims.Audience
 
@@ -57,6 +81,5 @@ func (u *UserGetterProxy) User(rq *http.Request) (*User, error) {
 	if ug == nil {
 		return nil, nil
 	}
-
-	return ug.User(rq)
+	return ug, nil
 }

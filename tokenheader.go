@@ -14,10 +14,13 @@ func ParseTokenClaimsUnvalidated(req *http.Request) (*jwt.Claims, error) {
 	if err != nil {
 		return nil, err
 	}
+	return ParseRawTokenClaimsUnvalidated(tokenString)
+}
 
-	// parse token unvalidated, extract claims that should always be present
+// ParseTokenClaimsUnvalidated returns the UNVALIDATED claims from the bearer token in the authentication header.
+func ParseRawTokenClaimsUnvalidated(token string) (*jwt.Claims, error) {
 	parsedClaims := &jwt.Claims{}
-	webToken, err := jwt.ParseSigned(tokenString)
+	webToken, err := jwt.ParseSigned(token)
 	if err != nil {
 		//nolint
 		return nil, fmt.Errorf("error parsing token: %s", err)
