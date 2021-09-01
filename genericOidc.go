@@ -99,7 +99,7 @@ func (o *GenericOIDC) User(rq *http.Request) (*User, error) {
 	return o.UserFromToken(rawIDToken)
 }
 
-// User implements the UserGetter to get a user from the request.
+// UserFromToken implements the UserGetter to get a user from a jwt token.
 func (o *GenericOIDC) UserFromToken(token string) (*User, error) {
 	ctx := context.Background()
 

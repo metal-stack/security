@@ -90,6 +90,10 @@ func (d DummyUG) User(rq *http.Request) (*User, error) {
 	return d.u, nil
 }
 
+func (d DummyUG) UserFromToken(token string) (*User, error) {
+	return d.u, nil
+}
+
 var dummyUser1 = &User{
 	Name: "User1",
 }

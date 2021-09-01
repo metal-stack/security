@@ -164,6 +164,9 @@ func (hma *HMACAuth) User(rq *http.Request) (*User, error) {
 
 	return hma.UserFromRequestData(rqd)
 }
+func (hma *HMACAuth) UserFromToken(token string) (*User, error) {
+	return nil, fmt.Errorf("UserFromToken not possible with hmac")
+}
 
 // UserFromRequestData calculates the hmac from header values. The input-values for the calculation
 // are: Date-Header, Request-Method, Request-Content.

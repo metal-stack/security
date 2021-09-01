@@ -56,6 +56,7 @@ func (u *User) HasGroup(grps ...ResourceAccess) bool {
 // A UserGetter returns the authenticated user from the request.
 type UserGetter interface {
 	User(rq *http.Request) (*User, error)
+	UserFromToken(token string) (*User, error)
 }
 
 // UserCreds stores different methods for user extraction from a request.
