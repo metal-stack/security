@@ -117,6 +117,9 @@ func (uc *UserCreds) User(rq *http.Request) (*User, error) {
 	}
 	return &guest, nil
 }
+func (uc *UserCreds) UserFromToken(token string) (*User, error) {
+	return nil, fmt.Errorf("UserFromToken not implemented in UserCreds")
+}
 
 // AddUserToken adds the given token as a bearer token to the request.
 func AddUserToken(rq *http.Request, token string) {
