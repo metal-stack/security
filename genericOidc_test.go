@@ -51,7 +51,7 @@ func TestGenericOIDC_User(t *testing.T) {
 				},
 			},
 			want:         nil,
-			wantErrAtNew: errors.New("Get \"https://wrongIssuer/.well-known/openid-configuration\": dial tcp: lookup wrongIssuer: no such host"),
+			wantErrAtNew: errors.New("Get \"https://wrongIssuer/.well-known/openid-configuration\": dial tcp: lookup wrongIssuer: Temporary failure in name resolution"),
 		},
 		{
 			name: "Wrong audience",
