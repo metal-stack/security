@@ -77,5 +77,8 @@ func (u *UserGetterProxy) userFromClaims(claims *jose.Claims) UserGetter {
 	if ug == nil {
 		ug = u.defaultUG
 	}
+	if ug == nil {
+		return nil
+	}
 	return ug
 }
