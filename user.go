@@ -118,7 +118,23 @@ func (uc *UserCreds) User(rq *http.Request) (*User, error) {
 	return &guest, nil
 }
 func (uc *UserCreds) UserFromToken(token string) (*User, error) {
-	return nil, fmt.Errorf("UserFromToken not implemented in UserCreds")
+	authers := make([]UserGetter, 0, len(uc.macauther)+1)
+	for i := range uc.macauther {
+		authers = append(authers, &uc.macauther[i])
+	}
+	if uc.dex != nil {
+		authers = append(authers, uc.dex)
+	}
+	for _, auth := range authers {
+		u, err := auth.UserFromToken(token)
+		if err == nil {
+			return u, nil
+		}
+		if !errors.Is(err, errNoAuthFound) && !errors.Is(err, errIllegalAuthFound) && !errors.Is(err, errUnknownAuthFound) {
+			return nil, err
+		}
+	}
+	return &guest, nil
 }
 
 // AddUserToken adds the given token as a bearer token to the request.

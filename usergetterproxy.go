@@ -44,9 +44,9 @@ func (u *UserGetterProxy) User(rq *http.Request) (*User, error) {
 		return nil, err
 	}
 
-	ug, err := u.userFromClaims(claims)
-	if err != nil {
-		return nil, err
+	ug := u.userFromClaims(claims)
+	if ug == nil {
+		return nil, nil
 	}
 	return ug.User(rq)
 }
@@ -56,14 +56,14 @@ func (u *UserGetterProxy) UserFromToken(token string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	ug, err := u.userFromClaims(claims)
-	if err != nil {
-		return nil, err
+	ug := u.userFromClaims(claims)
+	if ug == nil {
+		return nil, nil
 	}
 	return ug.UserFromToken(token)
 }
 
-func (u *UserGetterProxy) userFromClaims(claims *jose.Claims) (UserGetter, error) {
+func (u *UserGetterProxy) userFromClaims(claims *jose.Claims) UserGetter {
 	issuer := claims.Issuer
 	aud := claims.Audience
 
@@ -77,9 +77,5 @@ func (u *UserGetterProxy) userFromClaims(claims *jose.Claims) (UserGetter, error
 	if ug == nil {
 		ug = u.defaultUG
 	}
-
-	if ug == nil {
-		return nil, nil
-	}
-	return ug, nil
+	return ug
 }
