@@ -188,7 +188,7 @@ func TestDex_User(t *testing.T) {
 			name:  "token used before issued",
 			token: authtokenAlgRS256,
 			t:     time.Date(2019, time.May, 9, 6, 6, 0, 0, time.UTC),
-			err:   "Token used before issued",
+			err:   "token used before issued",
 		},
 		{
 			name:  "token is expired",
@@ -290,7 +290,7 @@ func TestDex_UserWithOptions(t *testing.T) {
 		{
 			name: "token used before issued",
 			t:    time.Date(2019, time.May, 9, 6, 6, 0, 0, time.UTC),
-			err:  "Token used before issued",
+			err:  "token used before issued",
 		},
 		{
 			name: "token is expired",
