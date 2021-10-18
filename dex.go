@@ -69,7 +69,7 @@ func (dx *Dex) With(opts ...Option) *Dex {
 // Claims we overwrite the Audience because in the current version of the jwt library this
 // is not an array.
 type Claims struct {
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 	Audience        interface{}       `json:"aud,omitempty"`
 	Groups          []string          `json:"groups"`
 	EMail           string            `json:"email"`
