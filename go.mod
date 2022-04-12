@@ -1,19 +1,48 @@
 module github.com/metal-stack/security
 
-go 1.16
+go 1.17
 
 require (
 	github.com/coreos/go-oidc/v3 v3.1.0
 	github.com/go-logr/logr v1.1.0
-	github.com/go-openapi/runtime v0.20.0
-	github.com/golang-jwt/jwt/v4 v4.1.0
-	github.com/google/go-cmp v0.5.6
+	github.com/go-openapi/runtime v0.23.3
+	github.com/golang-jwt/jwt/v4 v4.4.1
+	github.com/google/go-cmp v0.5.7
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
-	github.com/lestrrat-go/jwx v1.2.7
-	github.com/stretchr/testify v1.7.0
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
-	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f
-	golang.org/x/oauth2 v0.0.0-20211005180243-6b3c2da341f1
+	github.com/lestrrat-go/jwx v1.2.22
+	github.com/stretchr/testify v1.7.1
+	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
+	golang.org/x/net v0.0.0-20220412020605-290c469a71a5
+	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
 	gopkg.in/square/go-jose.v2 v2.6.0
+)
+
+require (
+	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.0-20210816181553-5444fa50b93d // indirect
+	github.com/go-openapi/errors v0.20.2 // indirect
+	github.com/go-openapi/strfmt v0.21.2 // indirect
+	github.com/go-openapi/swag v0.21.1 // indirect
+	github.com/go-stack/stack v1.8.1 // indirect
+	github.com/goccy/go-json v0.9.6 // indirect
+	github.com/golang/protobuf v1.4.2 // indirect
+	github.com/josharian/intern v1.0.0 // indirect
+	github.com/lestrrat-go/backoff/v2 v2.0.8 // indirect
+	github.com/lestrrat-go/blackmagic v1.0.0 // indirect
+	github.com/lestrrat-go/httpcc v1.0.1 // indirect
+	github.com/lestrrat-go/iter v1.0.1 // indirect
+	github.com/lestrrat-go/option v1.0.0 // indirect
+	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mitchellh/mapstructure v1.4.3 // indirect
+	github.com/oklog/ulid v1.3.1 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	go.mongodb.org/mongo-driver v1.9.0 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	google.golang.org/appengine v1.6.6 // indirect
+	google.golang.org/protobuf v1.25.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
