@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap/zaptest"
 
 	"github.com/google/go-cmp/cmp/cmpopts"
 
@@ -210,7 +211,7 @@ func TestIssuerResolver_User(t *testing.T) {
 				ClientID: clientID,
 			}
 
-			ir, err := NewMultiIssuerCache(func() ([]*IssuerConfig, error) {
+			ir, err := NewMultiIssuerCache(zaptest.NewLogger(t).Sugar(), func() ([]*IssuerConfig, error) {
 				return []*IssuerConfig{
 					ic,
 				}, nil
@@ -254,7 +255,7 @@ func TestMultiIssuerCache_reload(t *testing.T) {
 		calls++
 		return issuerList, nil
 	}
-	ic, err := NewMultiIssuerCache(ilp, ugp, IssuerReloadInterval(1*time.Second))
+	ic, err := NewMultiIssuerCache(zaptest.NewLogger(t).Sugar(), ilp, ugp, IssuerReloadInterval(1*time.Second))
 	require.NoError(t, err)
 	assert.Equal(t, 1, calls)
 	assert.Equal(t, 0, len(ic.cache))
@@ -405,7 +406,7 @@ func TestMultiIssuerCache_syncCache(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 
-			i, err := NewMultiIssuerCache(tt.fields.ilp, tt.fields.ugp)
+			i, err := NewMultiIssuerCache(zaptest.NewLogger(t).Sugar(), tt.fields.ilp, tt.fields.ugp)
 			require.NoError(t, err)
 			if err := i.syncCache(tt.args.newIcs); (err != nil) != tt.wantErr {
 				t.Errorf("syncCache() error = %v, wantErr %v", err, tt.wantErr)
