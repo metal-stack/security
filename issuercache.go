@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-logr/logr"
+	"go.uber.org/zap"
 )
 
 // MultiIssuerCache provides a UserGetter that is backed by multiple IssuerConfigs
@@ -20,7 +20,7 @@ type MultiIssuerCache struct {
 	cacheLock      sync.RWMutex
 	reloadInterval time.Duration
 
-	log logr.Logger
+	log *zap.SugaredLogger
 }
 
 // IssuerListProvider returns the list of allowed IssuerConfigs
@@ -30,14 +30,13 @@ type IssuerListProvider func() ([]*IssuerConfig, error)
 type UserGetterProvider func(ic *IssuerConfig) (UserGetter, error)
 
 // NewMultiIssuerCache creates a new MultiIssuerCache with given options
-func NewMultiIssuerCache(ilp IssuerListProvider, ugp UserGetterProvider, opts ...MultiIssuerUserGetterOption) (*MultiIssuerCache, error) {
-
+func NewMultiIssuerCache(log *zap.SugaredLogger, ilp IssuerListProvider, ugp UserGetterProvider, opts ...MultiIssuerUserGetterOption) (*MultiIssuerCache, error) {
 	issuerCache := &MultiIssuerCache{
 		issuerListProvider: ilp,
 		userGetterProvider: ugp,
 		cache:              make(map[string]*Issuer),
 		reloadInterval:     30 * time.Minute,
-		log:                logr.Discard(),
+		log:                log,
 	}
 
 	for _, opt := range opts {
@@ -47,7 +46,7 @@ func NewMultiIssuerCache(ilp IssuerListProvider, ugp UserGetterProvider, opts ..
 	// initial update
 	err := issuerCache.updateCache()
 	if err != nil {
-		issuerCache.log.Error(err, "error updating issuer cache")
+		issuerCache.log.Errorw("error updating issuer cache", "error", err)
 	}
 
 	// flush cache periodically
@@ -61,10 +60,10 @@ func NewMultiIssuerCache(ilp IssuerListProvider, ugp UserGetterProvider, opts ..
 				ticker.Stop()
 				return
 			case <-ticker.C:
-				issuerCache.log.Info("updating issuer cache")
+				issuerCache.log.Infow("updating issuer cache")
 				err := issuerCache.updateCache()
 				if err != nil {
-					issuerCache.log.Error(err, "error updating issuer cache")
+					issuerCache.log.Errorw("error updating issuer cache", "error", err)
 				}
 			}
 		}
@@ -84,14 +83,6 @@ func IssuerReloadInterval(duration time.Duration) MultiIssuerUserGetterOption {
 	}
 }
 
-// Logger sets the given Logger
-func Logger(log logr.Logger) MultiIssuerUserGetterOption {
-	return func(o *MultiIssuerCache) *MultiIssuerCache {
-		o.log = log
-		return o
-	}
-}
-
 func (i *MultiIssuerCache) User(rq *http.Request) (*User, error) {
 
 	claims, err := ParseTokenClaimsUnvalidated(rq)
@@ -105,7 +96,7 @@ func (i *MultiIssuerCache) User(rq *http.Request) (*User, error) {
 	var iss *Issuer
 	for _, clientID := range aud {
 
-		i.log.Info("lookup issuer", "issuer", issuer, "clientid", clientID)
+		i.log.Debugw("lookup issuer", "issuer", issuer, "clientid", clientID)
 
 		iss, err = i.getCachedIssuer(issuer, clientID)
 		if err != nil {
@@ -123,7 +114,7 @@ func (i *MultiIssuerCache) User(rq *http.Request) (*User, error) {
 		return nil, IssuerNotFound{}
 	}
 
-	i.log.Info("found issuer", "issuer", iss)
+	i.log.Debugw("found issuer", "issuer", iss)
 
 	if iss.userGetter == nil {
 		var err error
@@ -191,7 +182,7 @@ func (i *MultiIssuerCache) syncCache(newIcs []*IssuerConfig) error {
 	for _, ni := range newIcs {
 		_, alreadyThere := newTenantIDMap[ni.Tenant]
 		if alreadyThere {
-			i.log.Info("syncCache - skipping duplicate in new tenant-list", "tenant", ni.Tenant)
+			i.log.Infow("syncCache - skipping duplicate in new tenant-list", "tenant", ni.Tenant)
 			continue
 		}
 		newTenantIDMap[ni.Tenant] = ni
@@ -204,7 +195,7 @@ func (i *MultiIssuerCache) syncCache(newIcs []*IssuerConfig) error {
 		newTenantConfig, found := newTenantIDMap[tenant]
 		if !found {
 			delete(i.cache, cidIssKey)
-			i.log.Info("syncCache - delete tenant from cache", "tenant", tenant, "key", cidIssKey)
+			i.log.Infow("syncCache - delete tenant from cache", "tenant", tenant, "key", cidIssKey)
 			continue
 		}
 
@@ -219,7 +210,7 @@ func (i *MultiIssuerCache) syncCache(newIcs []*IssuerConfig) error {
 			delete(i.cache, cidIssKey)
 			// add new entry
 			i.cache[newCidIssKey] = &Issuer{issuerConfig: newTenantConfig}
-			i.log.Info("syncCache - updated tenant in cache", "tenant", tenant, "key", cidIssKey, "annotations", newTenantConfig.Annotations)
+			i.log.Infow("syncCache - updated tenant in cache", "tenant", tenant, "key", cidIssKey, "annotations", newTenantConfig.Annotations)
 		}
 
 		// delete entry from newTenantIDMap, as it is already processed
@@ -230,7 +221,7 @@ func (i *MultiIssuerCache) syncCache(newIcs []*IssuerConfig) error {
 	for _, ic := range newTenantIDMap {
 		key := cacheKey(ic.Issuer, ic.ClientID)
 		i.cache[key] = &Issuer{issuerConfig: ic}
-		i.log.Info("syncCache - add tenant to cache", "tenant", ic.Tenant, "key", key, "annotations", ic.Annotations)
+		i.log.Infow("syncCache - add tenant to cache", "tenant", ic.Tenant, "key", key, "annotations", ic.Annotations)
 	}
 	return nil
 }
