@@ -223,7 +223,7 @@ func TestIssuerResolver_User(t *testing.T) {
 				t.Fatal(err)
 			}
 			got, err := ir.User(tt.args.rq(token))
-			if !reflect.DeepEqual(tt.wantErr, err) {
+			if err != nil && (tt.wantErr.Error() != err.Error()) {
 				t.Errorf("User() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}

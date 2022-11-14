@@ -70,7 +70,7 @@ func TestUserGetterProxy_User(t *testing.T) {
 
 			gotUser, gotErr := tt.args.proxy.User(rq)
 
-			if !reflect.DeepEqual(tt.wantErr, gotErr) {
+			if gotErr != nil && (tt.wantErr.Error() != gotErr.Error()) {
 				t.Errorf("User() error = %v, wantErr %v", gotErr, tt.wantErr)
 				return
 			}
