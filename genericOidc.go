@@ -8,7 +8,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	"gopkg.in/square/go-jose.v2/jwt"
+	"github.com/go-jose/go-jose/v3/jwt"
 )
 
 // GenericOIDCClaims
