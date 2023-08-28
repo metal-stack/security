@@ -206,7 +206,7 @@ func TestMacCalc(t *testing.T) {
 	u := User{Name: "Bicycle Repair Man"}
 	hm := NewHMACAuth("mytype", []byte{1, 2, 3}, WithUser(u))
 	mac, ts := hm.create(time.Date(2019, time.January, 16, 14, 44, 45, 123, time.UTC), []byte{6, 7, 8, 9})
-	expectmac := "bfb747058c7036befe1e32ce1d180099aa85951656e2164245b53e766074e262"
+	expectmac := "bfb747058c7036befe1e32ce1d180099aa85951656e2164245b53e766074e262" // nolint:gosec
 	expectts := "2019-01-16T14:44:45Z"
 	if mac != expectmac {
 		t.Fatalf("expected mac %q, but got %q", expectmac, mac)

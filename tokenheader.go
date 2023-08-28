@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"gopkg.in/square/go-jose.v2/jwt"
+	"github.com/go-jose/go-jose/v3/jwt"
 )
 
 // ParseTokenClaimsUnvalidated returns the UNVALIDATED claims from the bearer token in the authentication header.
