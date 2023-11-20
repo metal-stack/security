@@ -67,7 +67,7 @@ func TestCreateTokenAndKeys(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			assert.Equal(t, u.Tenant, "Tn")
+			assert.Equal(t, "Tn", u.Tenant)
 			assert.Equal(t, u.Name, tc.PreferredName)
 			assert.Equal(t, u.EMail, tc.Email)
 
