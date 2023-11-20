@@ -155,12 +155,12 @@ func TestDex_keyfetcher(t *testing.T) {
 		assert.IsType(t, &rsa.PublicKey{}, k)
 		pub := k.(*rsa.PublicKey)
 		e, err := base64.RawURLEncoding.DecodeString(dk3["e"].(string))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		ei := new(big.Int).SetBytes(e)
 		assert.Equal(t, int(ei.Int64()), pub.E)
 		n, err := base64.RawURLEncoding.DecodeString(dk3["n"].(string))
 		ni := new(big.Int).SetBytes(n)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, ni.String(), pub.N.String())
 	}
 }
