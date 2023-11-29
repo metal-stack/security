@@ -1,12 +1,14 @@
 package security
 
 import (
+	"context"
 	"crypto/rsa"
 	"encoding/base64"
 	"math/big"
 	"strings"
 	"testing"
 
+	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/stretchr/testify/require"
@@ -132,18 +134,12 @@ func TestDex_keyfetcher(t *testing.T) {
 			return
 		}
 
-		for i := 0; i < keys.Len(); i++ {
-			k, ok := keys.Get(i)
-			if !ok {
-				t.Errorf("unable to fetch key with id:%d", i)
-			}
-			keyID, ok := k.Get("kid")
-			if !ok {
-				t.Errorf("unable to fetch key ID with id:%d", i)
-			}
-			if keyID != k.KeyID() {
-				t.Errorf("got KeyID: %q, want %q", keyID, k.KeyID())
-			}
+		for it := keys.Keys(context.Background()); it.Next(context.Background()); {
+			pair := it.Pair()
+			key := pair.Value.(jwk.Key)
+
+			keyID := key.KeyID()
+			require.NotEmpty(t, keyID)
 		}
 
 		k, err := dx.searchKey(searchkey)
