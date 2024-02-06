@@ -134,6 +134,12 @@ func (i *MultiIssuerCache) User(rq *http.Request) (*User, error) {
 			}
 		})
 		if err != nil {
+			// set a new sync.Once because the current one is wasted now and will never ever
+			// initialize the issuer. Later invocations will fall through and produce
+			// a nil pointer dereference
+			iss.ugOnce = sync.Once{}
+			i.updateCachedIssuer(iss)
+
 			// lazy initialization failed
 			return nil, err
 		}
