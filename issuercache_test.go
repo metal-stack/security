@@ -457,12 +457,12 @@ func Test_IssuerOnceReset(t *testing.T) {
 		Header: createHeader(AuthzHeaderKey, "bearer "+token),
 	})
 	assert.Nil(t, got, "result should be nil")
-	assert.Error(t, err, "an error is required on first invocation")
+	require.Error(t, err, "an error is required on first invocation")
 	assert.Equal(t, "first invocation should fail", err.Error(), "wrong error type")
 
 	got, err = ir.User(&http.Request{
 		Header: createHeader(AuthzHeaderKey, "bearer "+token),
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, tc.Email, got.EMail, "email should be equal")
 }
