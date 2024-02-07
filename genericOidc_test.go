@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"reflect"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -51,7 +52,7 @@ func TestGenericOIDC_User(t *testing.T) {
 				},
 			},
 			want:         nil,
-			wantErrAtNew: errors.New("Get \"https://wrongIssuer/.well-known/openid-configuration\": dial tcp: lookup wrongIssuer on 127.0.0.53:53: server misbehaving"),
+			wantErrAtNew: errors.New("Get \"https://wrongIssuer/.well-known/openid-configuration\": dial tcp: lookup wrongIssuer"),
 		},
 		{
 			name: "Wrong audience",
@@ -223,7 +224,7 @@ func TestGenericOIDC_User(t *testing.T) {
 
 			o, err := NewGenericOIDC(ic, Timeout(1*time.Second))
 			if err != nil {
-				if tt.wantErrAtNew == nil || tt.wantErrAtNew.Error() != err.Error() {
+				if tt.wantErrAtNew == nil || !strings.HasPrefix(err.Error(), tt.wantErrAtNew.Error()) {
 					t.Fatalf("NewGenericOIDC() error = %v, wantErr %v", err, tt.wantErrAtNew)
 				}
 

@@ -2,6 +2,7 @@ package security
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -419,4 +420,49 @@ func TestMultiIssuerCache_syncCache(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_IssuerOnceReset(t *testing.T) {
+	tc := DefaultTokenCfg()
+	tc.ExpiresAt = time.Now().Add(1 * time.Hour)
+
+	srv, token, err := GenerateTokenAndKeyServer(tc, MustCreateTokenAndKeys)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer srv.Close()
+
+	invocations := 0
+	ir, err := NewMultiIssuerCache(slog.New(slog.NewJSONHandler(os.Stdout, nil)), func() ([]*IssuerConfig, error) {
+		return []*IssuerConfig{
+			{
+				Tenant:   "Tn",
+				Issuer:   srv.URL,
+				ClientID: tc.Audience[0],
+			},
+		}, nil
+	}, func(ic *IssuerConfig) (UserGetter, error) {
+		ug, err := NewGenericOIDC(ic, GenericUserExtractor(DefaultGenericUserExtractor))
+		if invocations == 0 {
+			invocations++
+			return nil, fmt.Errorf("first invocation should fail")
+		}
+		return ug, err
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := ir.User(&http.Request{
+		Header: createHeader(AuthzHeaderKey, "bearer "+token),
+	})
+	assert.Nil(t, got, "result should be nil")
+	require.Error(t, err, "an error is required on first invocation")
+	assert.Equal(t, "first invocation should fail", err.Error(), "wrong error type")
+
+	got, err = ir.User(&http.Request{
+		Header: createHeader(AuthzHeaderKey, "bearer "+token),
+	})
+	require.NoError(t, err)
+	assert.Equal(t, tc.Email, got.EMail, "email should be equal")
 }
