@@ -17,7 +17,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	randByteString = func(n int) []byte {
+	randByteString = func(_ int) []byte {
 		return []byte{1, 2, 3, 4, 5, 6}
 	}
 	flag.Parse()
