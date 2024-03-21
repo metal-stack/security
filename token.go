@@ -18,8 +18,8 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/go-jose/go-jose/v3"
-	"github.com/go-jose/go-jose/v3/jwt"
+	"github.com/go-jose/go-jose/v4"
+	"github.com/go-jose/go-jose/v4/jwt"
 )
 
 // TokenCfg contains the data for filling the token
@@ -195,7 +195,7 @@ func CreateToken(signer jose.Signer, cl interface{}, privateClaims ...interface{
 	for i := range privateClaims {
 		builder = builder.Claims(privateClaims[i])
 	}
-	raw, err := builder.CompactSerialize()
+	raw, err := builder.Serialize()
 	if err != nil {
 		return "", err
 	}

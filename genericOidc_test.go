@@ -13,7 +13,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/go-jose/go-jose/v3"
+	"github.com/go-jose/go-jose/v4"
 )
 
 type wantUserFn func(issuer string) *User
@@ -178,7 +178,7 @@ func TestGenericOIDC_User(t *testing.T) {
 				},
 			},
 			want:                nil,
-			wantErrAtUserRegExp: errors.New("oidc: id token signed with unsupported algorithm, expected \\[\"RS256\" \"RS384\" \"RS512\"\\] got \"ES256\""),
+			wantErrAtUserRegExp: errors.New("oidc: malformed jwt: go-jose/go-jose: unexpected signature algorithm \"ES256\"; expected \\[\"RS256\" \"RS384\" \"RS512\"\\]"),
 		},
 		{
 			name: "Test timeout",
