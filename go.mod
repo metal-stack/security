@@ -3,8 +3,8 @@ module github.com/metal-stack/security
 go 1.22
 
 require (
-	github.com/coreos/go-oidc/v3 v3.9.0
-	github.com/go-jose/go-jose/v3 v3.0.3
+	github.com/coreos/go-oidc/v3 v3.10.0
+	github.com/go-jose/go-jose/v4 v4.0.1
 	github.com/go-openapi/runtime v0.28.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/go-cmp v0.6.0

@@ -219,12 +219,14 @@ const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 func randomByteString(n int) []byte {
 	b := make([]byte, n)
 	for i := range b {
+		// FIXME convert to rand/v2 rand.N()
 		b[i] = letterBytes[secureRand.Intn(len(letterBytes))]
 	}
 	return b
 }
 
 // create a math/random with a secure source to get real random numbers
+//
 //nolint:gosec
 var secureRand = rand.New(src)
 var src cryptoSource

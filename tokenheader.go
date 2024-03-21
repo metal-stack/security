@@ -5,8 +5,22 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/go-jose/go-jose/v3/jwt"
+	"github.com/go-jose/go-jose/v4"
+	"github.com/go-jose/go-jose/v4/jwt"
 )
+
+var signatureAlgorithms = []jose.SignatureAlgorithm{
+	jose.RS256,
+	jose.RS384,
+	jose.RS512,
+	jose.ES256,
+	jose.ES384,
+	jose.ES512,
+	jose.PS256,
+	jose.PS384,
+	jose.PS512,
+	jose.EdDSA,
+}
 
 // ParseTokenClaimsUnvalidated returns the UNVALIDATED claims from the bearer token in the authentication header.
 func ParseTokenClaimsUnvalidated(req *http.Request) (*jwt.Claims, error) {
@@ -17,16 +31,14 @@ func ParseTokenClaimsUnvalidated(req *http.Request) (*jwt.Claims, error) {
 
 	// parse token unvalidated, extract claims that should always be present
 	parsedClaims := &jwt.Claims{}
-	webToken, err := jwt.ParseSigned(tokenString)
+	webToken, err := jwt.ParseSigned(tokenString, signatureAlgorithms)
 	if err != nil {
-		//nolint
-		return nil, fmt.Errorf("error parsing token: %s", err)
+		return nil, fmt.Errorf("error parsing token: %w", err)
 	}
 
 	err = webToken.UnsafeClaimsWithoutVerification(parsedClaims)
 	if err != nil {
-		//nolint
-		return nil, fmt.Errorf("error parsing token claims: %s", err)
+		return nil, fmt.Errorf("error parsing token claims: %w", err)
 	}
 
 	return parsedClaims, nil
