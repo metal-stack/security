@@ -2,7 +2,6 @@ package security
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/go-openapi/runtime"
@@ -25,7 +24,7 @@ var (
 		Name:   "anonymous",
 		Groups: []ResourceAccess{},
 	}
-	errNoAuthFound = fmt.Errorf("no auth found")
+	errNoAuthFound = errors.New("no auth found")
 )
 
 // ResourceAccess is the type for our groups

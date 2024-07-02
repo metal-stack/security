@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -38,8 +39,8 @@ func newWrongHMAC(got, want string) *WrongHMAC {
 }
 
 var (
-	errIllegalAuthFound = fmt.Errorf("illegal auth found")
-	errUnknownAuthFound = fmt.Errorf("unknown authtype found")
+	errIllegalAuthFound = errors.New("illegal auth found")
+	errUnknownAuthFound = errors.New("unknown authtype found")
 )
 
 // A HMACAuth is an authenticator which uses a hmac calculation.

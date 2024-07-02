@@ -2,6 +2,7 @@ package security
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -149,6 +150,9 @@ func GenericUserExtractor(fn GenericUserExtractorFn) GenericOIDCOption {
 // DefaultGenericUserExtractor is the default implementation of how to extract
 // the User from the token.
 func DefaultGenericUserExtractor(ic *IssuerConfig, claims *GenericOIDCClaims) (*User, error) {
+	if claims == nil {
+		return nil, errors.New("claims is nil")
+	}
 	var grps []ResourceAccess
 	for _, g := range claims.Roles {
 		grps = append(grps, ResourceAccess(g))

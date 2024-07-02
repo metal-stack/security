@@ -2,7 +2,6 @@ package security
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -445,7 +444,7 @@ func Test_IssuerOnceReset(t *testing.T) {
 		ug, err := NewGenericOIDC(ic, GenericUserExtractor(DefaultGenericUserExtractor))
 		if invocations == 0 {
 			invocations++
-			return nil, fmt.Errorf("first invocation should fail")
+			return nil, errors.New("first invocation should fail")
 		}
 		return ug, err
 	})

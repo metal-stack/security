@@ -7,6 +7,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -249,14 +250,14 @@ func GenerateSigningKey(alg jose.SignatureAlgorithm, bits int) (crypto.PublicKey
 			jose.EdDSA: 256,
 		}
 		if bits != 0 && bits != keylen[alg] {
-			return nil, nil, fmt.Errorf("invalid elliptic curve key size, this algorithm does not support arbitrary size")
+			return nil, nil, errors.New("invalid elliptic curve key size, this algorithm does not support arbitrary size")
 		}
 	case jose.RS256, jose.RS384, jose.RS512, jose.PS256, jose.PS384, jose.PS512:
 		if bits == 0 {
 			bits = 2048
 		}
 		if bits < 2048 {
-			return nil, nil, fmt.Errorf("invalid key size for RSA key, 2048 or more is required")
+			return nil, nil, errors.New("invalid key size for RSA key, 2048 or more is required")
 		}
 	case jose.HS256, jose.HS384, jose.HS512:
 		return nil, nil, fmt.Errorf("unsupported algorithm %s for signing key", alg)
