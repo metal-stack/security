@@ -153,7 +153,7 @@ func DefaultGenericUserExtractor(ic *IssuerConfig, claims *GenericOIDCClaims) (*
 	if claims == nil {
 		return nil, errors.New("claims is nil")
 	}
-	grps := make([]ResourceAccess, len(claims.Roles))
+	var grps []ResourceAccess
 	for _, g := range claims.Roles {
 		grps = append(grps, ResourceAccess(g))
 	}

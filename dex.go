@@ -224,7 +224,7 @@ func defaultUserExtractor(claims *Claims) (*User, error) {
 	if claims == nil {
 		return nil, errors.New("claims is nil")
 	}
-	grps := make([]ResourceAccess, len(claims.Groups))
+	var grps []ResourceAccess
 	for _, g := range claims.Groups {
 		grps = append(grps, ResourceAccess(g))
 	}
