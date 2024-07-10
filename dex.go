@@ -217,10 +217,13 @@ func (dx *Dex) User(rq *http.Request) (*User, error) {
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 		return dx.userExtractor(claims)
 	}
-	return nil, fmt.Errorf("invalid claims")
+	return nil, errors.New("invalid claims")
 }
 
 func defaultUserExtractor(claims *Claims) (*User, error) {
+	if claims == nil {
+		return nil, errors.New("claims is nil")
+	}
 	var grps []ResourceAccess
 	for _, g := range claims.Groups {
 		grps = append(grps, ResourceAccess(g))
