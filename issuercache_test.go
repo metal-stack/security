@@ -296,7 +296,7 @@ func TestMultiIssuerCache_retryFailing(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	assert.Equal(t, 4, calls)
-	assert.Len(t, ic.cache, 0)
+	assert.Empty(t, ic.cache)
 }
 
 func TestMultiIssuerCache_retrySecondReload(t *testing.T) {
