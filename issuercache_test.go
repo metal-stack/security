@@ -276,6 +276,65 @@ func TestMultiIssuerCache_reload(t *testing.T) {
 	assert.Len(t, ic.cache, 1)
 }
 
+func TestMultiIssuerCache_retryFailing(t *testing.T) {
+	ugp := func(ic *IssuerConfig) (UserGetter, error) {
+		return nil, nil
+	}
+
+	calls := 0
+
+	ilp := func() ([]*IssuerConfig, error) {
+		calls++
+		return nil, errors.New("expected error")
+	}
+	ic, err := NewMultiIssuerCache(slog.New(slog.NewJSONHandler(os.Stdout, nil)), ilp, ugp, IssuerReloadInterval(5*time.Second), IssuerRetryInterval(500*time.Millisecond))
+	require.NoError(t, err)
+	assert.Equal(t, 1, calls)
+	assert.Empty(t, ic.cache)
+
+	// wait for reload
+	time.Sleep(2 * time.Second)
+
+	assert.Equal(t, 4, calls)
+	assert.Len(t, ic.cache, 0)
+}
+
+func TestMultiIssuerCache_retrySecondReload(t *testing.T) {
+	ugp := func(ic *IssuerConfig) (UserGetter, error) {
+		return nil, nil
+	}
+
+	calls := 0
+	issuerList := []*IssuerConfig{}
+
+	ilp := func() ([]*IssuerConfig, error) {
+		calls++
+		if calls > 1 {
+			return issuerList, nil
+		}
+		return nil, errors.New("expected error")
+	}
+	ic, err := NewMultiIssuerCache(slog.New(slog.NewJSONHandler(os.Stdout, nil)), ilp, ugp, IssuerReloadInterval(1*time.Second), IssuerRetryInterval(500*time.Millisecond))
+	require.NoError(t, err)
+	assert.Equal(t, 1, calls)
+	assert.Empty(t, ic.cache)
+
+	// prepare list
+	issuerList = []*IssuerConfig{
+		{
+			Annotations: nil,
+			Tenant:      "t1",
+			Issuer:      "http://issuer/t1",
+			ClientID:    "cli-t1",
+		},
+	}
+	// wait for reload
+	time.Sleep(2 * time.Second)
+
+	assert.Equal(t, 3, calls)
+	assert.Len(t, ic.cache, 1)
+}
+
 func TestMultiIssuerCache_syncCache(t *testing.T) {
 	type fields struct {
 		ilp  IssuerListProvider
