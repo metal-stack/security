@@ -19,6 +19,7 @@ type MultiIssuerCache struct {
 	cache          map[string]*Issuer
 	cacheLock      sync.RWMutex
 	reloadInterval time.Duration
+	retryInterval  time.Duration
 	log            *slog.Logger
 }
 
@@ -41,6 +42,7 @@ func NewMultiIssuerCache(log *slog.Logger, ilp IssuerListProvider, ugp UserGette
 		userGetterProvider: ugp,
 		cache:              make(map[string]*Issuer),
 		reloadInterval:     30 * time.Minute,
+		retryInterval:      30 * time.Second,
 		log:                log,
 	}
 
@@ -48,27 +50,42 @@ func NewMultiIssuerCache(log *slog.Logger, ilp IssuerListProvider, ugp UserGette
 		opt(issuerCache)
 	}
 
+	var (
+		// flush cache periodically
+		done         = make(chan bool)
+		isRetrying   bool
+		reloadTicker *time.Ticker
+	)
 	// initial update
 	err := issuerCache.updateCache()
 	if err != nil {
 		issuerCache.log.Error("error updating issuer cache", "error", err)
+		isRetrying = true
+		reloadTicker = time.NewTicker(issuerCache.retryInterval)
+	} else {
+		isRetrying = false
+		reloadTicker = time.NewTicker(issuerCache.reloadInterval)
 	}
-
-	// flush cache periodically
-	done := make(chan bool)
-	ticker := time.NewTicker(issuerCache.reloadInterval)
 
 	go func() {
 		for {
 			select {
 			case <-done:
-				ticker.Stop()
+				reloadTicker.Stop()
 				return
-			case <-ticker.C:
+
+			case <-reloadTicker.C:
 				issuerCache.log.Info("updating issuer cache")
 				err := issuerCache.updateCache()
 				if err != nil {
-					issuerCache.log.Error("error updating issuer cache", "error", err)
+					issuerCache.log.Error("error updating issuer cache, retrying...", "error", err)
+					isRetrying = true
+					reloadTicker.Reset(issuerCache.retryInterval)
+					continue
+				}
+				if isRetrying {
+					isRetrying = false
+					reloadTicker.Reset(issuerCache.reloadInterval)
 				}
 			}
 		}
@@ -84,6 +101,14 @@ type MultiIssuerUserGetterOption func(mic *MultiIssuerCache) *MultiIssuerCache
 func IssuerReloadInterval(duration time.Duration) MultiIssuerUserGetterOption {
 	return func(o *MultiIssuerCache) *MultiIssuerCache {
 		o.reloadInterval = duration
+		return o
+	}
+}
+
+// IssuerRetryInterval lets the client set the issuer cache retry sleep period
+func IssuerRetryInterval(duration time.Duration) MultiIssuerUserGetterOption {
+	return func(o *MultiIssuerCache) *MultiIssuerCache {
+		o.retryInterval = duration
 		return o
 	}
 }
