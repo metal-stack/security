@@ -153,7 +153,7 @@ func TestDex_keyfetcher(t *testing.T) {
 		e, err := base64.RawURLEncoding.DecodeString(dk3["e"].(string))
 		require.NoError(t, err)
 		ei := new(big.Int).SetBytes(e)
-		assert.Equal(t, int(ei.Int64()), pub.E)
+		assert.EqualValues(t, ei.Int64(), pub.E)
 		n, err := base64.RawURLEncoding.DecodeString(dk3["n"].(string))
 		ni := new(big.Int).SetBytes(n)
 		require.NoError(t, err)
