@@ -218,20 +218,13 @@ const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 func randomByteString(n int) []byte {
 	ret := make([]byte, n)
-	i := 0
-	for {
-
+	for i := range n {
 		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(letterBytes))))
 		if err != nil {
 			continue
 		}
 
 		ret[i] = letterBytes[num.Int64()]
-
-		i++
-		if i == n {
-			break
-		}
 	}
 
 	return ret
