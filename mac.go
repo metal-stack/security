@@ -2,13 +2,12 @@ package security
 
 import (
 	"crypto/hmac"
-	crand "crypto/rand"
+	"crypto/rand"
 	"crypto/sha256"
-	"encoding/binary"
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"net/http"
 	"strings"
 	"time"
@@ -218,33 +217,15 @@ var randByteString = randomByteString
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 func randomByteString(n int) []byte {
-	b := make([]byte, n)
-	for i := range b {
-		// FIXME convert to rand/v2 rand.N()
-		b[i] = letterBytes[secureRand.Intn(len(letterBytes))]
+	ret := make([]byte, n)
+	for i := range n {
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(letterBytes))))
+		if err != nil {
+			continue
+		}
+
+		ret[i] = letterBytes[num.Int64()]
 	}
-	return b
-}
 
-// create a math/random with a secure source to get real random numbers
-//
-//nolint:gosec
-var secureRand = rand.New(src)
-var src cryptoSource
-
-type cryptoSource struct{}
-
-func (s cryptoSource) Seed(seed int64) {
-	// crypto/rand does not need a seed
-}
-func (s cryptoSource) Int63() int64 {
-	return int64(s.Uint64() & ^uint64(1<<63))
-}
-
-func (s cryptoSource) Uint64() (v uint64) {
-	err := binary.Read(crand.Reader, binary.BigEndian, &v)
-	if err != nil {
-		panic(fmt.Sprintf("crypto/rand is unavailable, read failed with: %v", err))
-	}
-	return v
+	return ret
 }

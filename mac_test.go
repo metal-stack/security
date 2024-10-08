@@ -287,4 +287,7 @@ func TestMacCalc2(t *testing.T) {
 func Test_randomByteString(t *testing.T) {
 	// make sure that we dont rely on pseudo-random-numbers
 	require.NotEqual(t, "XVlBzgbaiCMRAjWwhTHctcuA", string(randomByteString(24)))
+	require.Len(t, randomByteString(24), 24)
+	require.Len(t, randomByteString(32), 32)
+
 }
