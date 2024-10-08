@@ -19,6 +19,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+// Serves as barrier to avoid race conditions during reload intervals.
+const delta = 100 * time.Millisecond
+
 type requestFn func(token string) *http.Request
 
 type userFn func(issuerUrl string) *User
@@ -270,7 +273,7 @@ func TestMultiIssuerCache_reload(t *testing.T) {
 		},
 	}
 	// wait for reload
-	time.Sleep(2 * time.Second)
+	time.Sleep(2*time.Second - delta)
 
 	assert.Equal(t, 2, calls)
 	assert.Len(t, ic.cache, 1)
@@ -293,7 +296,7 @@ func TestMultiIssuerCache_retryFailing(t *testing.T) {
 	assert.Empty(t, ic.cache)
 
 	// wait for reload
-	time.Sleep(2 * time.Second)
+	time.Sleep(2*time.Second - delta)
 
 	assert.Equal(t, 4, calls)
 	assert.Empty(t, ic.cache)
@@ -329,7 +332,7 @@ func TestMultiIssuerCache_retrySecondReload(t *testing.T) {
 		},
 	}
 	// wait for reload
-	time.Sleep(2 * time.Second)
+	time.Sleep(2*time.Second - delta)
 
 	assert.Equal(t, 3, calls)
 	assert.Len(t, ic.cache, 1)
