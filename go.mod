@@ -6,11 +6,11 @@ require (
 	github.com/coreos/go-oidc/v3 v3.11.0
 	github.com/go-jose/go-jose/v4 v4.0.4
 	github.com/go-openapi/runtime v0.28.0
-	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
-	github.com/lestrrat-go/jwx/v2 v2.1.1
+	github.com/lestrrat-go/jwx/v2 v2.1.2
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/crypto v0.28.0
 	golang.org/x/net v0.30.0

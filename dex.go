@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 )
 
@@ -30,6 +30,8 @@ type Dex struct {
 	algorithmWhitelist []string
 
 	userExtractor UserExtractorFn
+
+	jwtParserOptions []jwt.ParserOption
 }
 
 type keyRsp struct {
@@ -70,7 +72,7 @@ func (dx *Dex) With(opts ...Option) *Dex {
 // is not an array.
 type Claims struct {
 	jwt.RegisteredClaims
-	Audience        interface{}       `json:"aud,omitempty"`
+	Audience        any               `json:"aud,omitempty"`
 	Groups          []string          `json:"groups"`
 	EMail           string            `json:"email"`
 	Name            string            `json:"name"`
@@ -95,6 +97,13 @@ func UserExtractor(fn UserExtractorFn) Option {
 func AlgorithmsWhitelist(algNames []string) Option {
 	return func(dex *Dex) *Dex {
 		dex.algorithmWhitelist = algNames
+		return dex
+	}
+}
+
+func JWTParserOptions(opt jwt.ParserOption) Option {
+	return func(dex *Dex) *Dex {
+		dex.jwtParserOptions = append(dex.jwtParserOptions, opt)
 		return dex
 	}
 }
@@ -166,7 +175,7 @@ func (dx *Dex) updateKeys(old jwk.Set) (jwk.Set, error) {
 
 // searchKey searches the given key in the set loaded from dex. If
 // there is a key it will be returned otherwise an error is returned
-func (dx *Dex) searchKey(kid string) (interface{}, error) {
+func (dx *Dex) searchKey(kid string) (any, error) {
 	for i := 0; i < 2; i++ {
 		keys, err := dx.fetchKeys()
 		if err != nil {
@@ -177,7 +186,7 @@ func (dx *Dex) searchKey(kid string) (interface{}, error) {
 			dx.forceUpdate()
 			continue
 		}
-		var key interface{}
+		var key any
 		err = jwtkey.Raw(&key)
 		return key, err
 	}
@@ -197,7 +206,7 @@ func (dx *Dex) User(rq *http.Request) (*User, error) {
 	}
 	bearerToken := strings.TrimSpace(splitToken[1])
 
-	token, err := jwt.ParseWithClaims(bearerToken, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(bearerToken, &Claims{}, func(token *jwt.Token) (any, error) {
 		alg, ok := token.Header["alg"].(string)
 		if !ok {
 			return nil, errors.New("invalid token")
@@ -210,7 +219,7 @@ func (dx *Dex) User(rq *http.Request) (*User, error) {
 			return nil, errors.New("invalid token")
 		}
 		return dx.searchKey(kid)
-	})
+	}, dx.jwtParserOptions...)
 	if err != nil {
 		return nil, err
 	}
