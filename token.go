@@ -191,7 +191,7 @@ type providerJSON struct {
 }
 
 // CreateToken creates a jwt token with the given claims
-func CreateToken(signer jose.Signer, cl interface{}, privateClaims ...interface{}) (string, error) {
+func CreateToken(signer jose.Signer, cl any, privateClaims ...any) (string, error) {
 	builder := jwt.Signed(signer).Claims(cl)
 	for i := range privateClaims {
 		builder = builder.Claims(privateClaims[i])
@@ -204,7 +204,7 @@ func CreateToken(signer jose.Signer, cl interface{}, privateClaims ...interface{
 }
 
 // MustMakeSigner creates a Signer and panics if an error occurs
-func MustMakeSigner(alg jose.SignatureAlgorithm, k interface{}) jose.Signer {
+func MustMakeSigner(alg jose.SignatureAlgorithm, k any) jose.Signer {
 	sig, err := jose.NewSigner(jose.SigningKey{Algorithm: alg, Key: k}, nil)
 	if err != nil {
 		panic("failed to create signer:" + err.Error())

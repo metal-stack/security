@@ -20,7 +20,7 @@ import (
 
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 var (
@@ -35,7 +35,7 @@ var (
 	//nolint:gosec
 	authtokenAlgHS256Kid = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsICJraWQiOiIwMWMwMmQ1ZC1jYWEwLTQ0NTAtYWQ3Ni1iZjk1MDQyMGI4YjYifQ.eyJhdWQiOlsidGhlQXVkaWVuY2UiXSwiZW1haWwiOiJhY2hpbS5hZG1pbkB0ZW5hbnQuZGUiLCJleHAiOjE1ODc3NTMxODYsImZlZGVyYXRlZF9jbGFpbXMiOnsiY29ubmVjdG9yX2lkIjoidG50X2xkYXBfb3BlbmxkYXAiLCJ1c2VyX2lkIjoiY249YWNoaW0uYWRtaW4sb3U9UGVvcGxlLGRjPXRlbmFudCxkYz1kZSJ9LCJncm91cHMiOlsiZ3JwYSIsImdycGIiXSwiaWF0IjoxNTg3NzM4Nzg2LCJpc3MiOiJodHRwczovL2RleC50ZXN0Lm1ldGFsLXN0YWNrLmlvL2RleCIsIm5hbWUiOiJhY2hpbSIsInN1YiI6ImFjaGltIn0.vHRBpA1Jvb6kPLI56xCdIh42or96N5sOHg3cHs-is-o"
 
-	dk1 = map[string]interface{}{
+	dk1 = map[string]any{
 		"use": "sig",
 		"kty": "RSA",
 		"kid": "01c02d5d-caa0-4450-ad76-bf950420b8b6",
@@ -43,7 +43,7 @@ var (
 		"n":   "zFSDsEpZ-EegnJpYFTmaUVz2OvtCQty1gYFxLECICU2lrFCxoAFnkARjbyuvT68sIbhdSZ981YoY_oVohhLOMZjNV3KUhRPlMaSZsEDfnZLOGjfRzjOLNGwtcfu7uLvSVOhaF1bqNUtQHN1ljEmcHWJbJzPFLOBD5uK5tZ-zT0q8NyDRnIB3yNPppk1OpMgmAvxpXaIjsTUfOaOz4vbG6opWg4wz-cLgtyvA1YMSQ24EVnHPC4b2fJOJf9DXf1qkVNjiY9BqO19afv8pM1cliYu66wN4D_eAXQnhA_8j6AQyNkHusaOG1TCzxyPQDtcQYjNZfhQBxXLZE_JM_XdCSAdtwPcQTsySHQHIxsFG3M90DiuukCc7iusAcmCupY5jXTH70_ZykvvaTqxgjavj5zsSndiCwSicrJSoh4YwhqUsZMKivphhyZIb0VpzWRhTYhlN1snC184caa_kPgyRRZux40RxCjluo9Taftm2MUji4BZ_TovUG2IBsOJdp9OdmKT9zuw_feNUL5o3ImCmP4ifI03I3kCATS-KnvNnILQQXYpwP-6hNEZJAXcBtXUnoqMbOdqOjKjNc8ZIBwINe8WVuCZhH2bZc0RK8kh6EgZupMrxAPmmvzfr8RgfU8LKOkQ6Y41UhE7qCkLWARLgQpaRu5HmE_YrZvodqSmY3fU",
 		"e":   "AQAB",
 	}
-	dk2 = map[string]interface{}{
+	dk2 = map[string]any{
 		"use": "sig",
 		"kty": "RSA",
 		"kid": "0f3abdf4e05337b02fa0e36291b9147379dbb686",
@@ -51,7 +51,7 @@ var (
 		"n":   "sUGZtErd2hymWcdHcjkm5bNqVlvMEkVxIabEgWUwWW0mWc2g5QHKysXDS6Oi1Oyzumjx-dmbZ6nz3C_bJMqEbIwRSyxGnUDziraUIs8WAp0bGv440llxhmT26UifOF9TL8iUvRAVKDzCv3YttyxmLojls3c-L9P-71Uc2NmskeBe9lwE5E-1SX2lx01fjhVRrp2TeujqeY7VR4sdKPXyECn7-W7nuOUAQt4ziiGX-gNrt--SX2oG_2TLw_Urv8O9epw8VjB9zWXKsmjkCUVxPAdSHdnlyRQf7TAhiygcK11Fl2ABIv_DwP0Ei5sd-E6FPqfzrNVA81L16mFHaZLciQ",
 		"e":   "AQAB",
 	}
-	dk3 = map[string]interface{}{
+	dk3 = map[string]any{
 		"use": "sig",
 		"kty": "RSA",
 		"kid": "d3519837ce558fa66192a82f925c1169de358d63",
@@ -59,7 +59,7 @@ var (
 		"n":   "qMu9ak2GZVy7mgSG2nqDJAlYBqXCTTbtSTEtAVpYKcCZKRkDY7kWkPrE8rdhuZV0sVN1-5SQivaDtfXSMBBaLpZFbhA0l98fH3ExOpVbdlHNNWd3mSJEcEFc1QGhc755shyFIliOW59JMNzETIF8eq-MXMt8dKxtnUVZWJk8EYOQSxYK7E9cl4HtACIoGHchRrUctIUJBFgSRbKx1u-_Qnf9cnJeSNdXKL8l7bvLtm5UZWPQrUo229pQ687jUKZu-k2Xag3bAsRGJ6ScbWuLBIJdOxNbvnA3XyARxvqIeZAoEFxDn3q6rhyG024MeRhn4Rd_RzeEq2Y0hsa68M7pkw",
 		"e":   "AQAB",
 	}
-	dk123 = map[string]interface{}{
+	dk123 = map[string]any{
 		"use": "sig",
 		"kty": "RSA",
 		"kid": "123",
@@ -68,20 +68,20 @@ var (
 		"e":   "AQAB",
 	}
 
-	firstkeys = []map[string]interface{}{
+	firstkeys = []map[string]any{
 		dk1,
 		dk2,
 	}
-	firstkeydata = map[string]interface{}{
+	firstkeydata = map[string]any{
 		"keys": firstkeys,
 	}
-	secondkeys = []map[string]interface{}{
+	secondkeys = []map[string]any{
 		dk1,
 		dk2,
 		dk3,
 		dk123,
 	}
-	secondkeydata = map[string]interface{}{
+	secondkeydata = map[string]any{
 		"keys": secondkeys,
 	}
 )
@@ -115,7 +115,7 @@ func TestDex_keyfetcher(t *testing.T) {
 		t.Errorf("the keys were not fetched")
 		return
 	}
-	data := [][]map[string]interface{}{firstkeys, secondkeys}
+	data := [][]map[string]any{firstkeys, secondkeys}
 	searchkey := dk3["kid"].(string)
 	// the server will return first "firstkeys" and on the secondcall "secondkeys"
 	// only the secondkeys contains "dk3", so the following tests if the dex
@@ -190,53 +190,53 @@ func TestDex_User(t *testing.T) {
 			name:  "token is expired",
 			token: authtokenAlgRS256,
 			t:     time.Date(2019, time.May, 10, 6, 6, 0, 0, time.UTC),
-			err:   "token is expired by 15h59m21s",
+			err:   "token has invalid claims: token is expired",
 		},
 		{
 			name:  "token invalid default whitelist - signature algorithm 'none' no kid",
 			token: authtokenAlgNone,
 			t:     time.Date(2019, time.May, 10, 6, 6, 0, 0, time.UTC),
-			err:   "invalid token",
+			err:   "token is unverifiable: error while executing keyfunc: invalid token",
 		},
 		{
 			name:  "token invalid default whitelist - signature algorithm 'none' with kid",
 			token: authtokenAlgNoneKid,
 			t:     time.Date(2019, time.May, 10, 6, 6, 0, 0, time.UTC),
-			err:   "invalid token",
+			err:   "token is unverifiable: error while executing keyfunc: invalid token",
 		},
 		{
 			name:  "token invalid default whitelist - signature algorithm 'HS256' no kid",
 			token: authtokenAlgHS256,
 			t:     time.Date(2019, time.May, 10, 6, 6, 0, 0, time.UTC),
-			err:   "invalid token",
+			err:   "token is unverifiable: error while executing keyfunc: invalid token",
 		},
 		{
 			name:  "token invalid default whitelist - signature algorithm 'HS256' with kid",
 			token: authtokenAlgHS256Kid,
 			t:     time.Date(2019, time.May, 10, 6, 6, 0, 0, time.UTC),
-			err:   "invalid token",
+			err:   "token is unverifiable: error while executing keyfunc: invalid token",
 		},
 		{
 			name:  "algorithm not in whitelist 'RS256' - signature algorithm 'HS256' with kid",
 			token: authtokenAlgHS256Kid,
 			opt:   AlgorithmsWhitelist([]string{"RS256"}),
 			t:     time.Date(2019, time.May, 10, 6, 6, 0, 0, time.UTC),
-			err:   "invalid token",
+			err:   "token is unverifiable: error while executing keyfunc: invalid token",
 		},
 		{
 			name:  "algorithm not in whitelist - empty whitelist",
 			token: authtokenAlgRS256,
 			opt:   AlgorithmsWhitelist([]string{}),
 			t:     time.Date(2019, time.May, 10, 6, 6, 0, 0, time.UTC),
-			err:   "invalid token",
+			err:   "token is unverifiable: error while executing keyfunc: invalid token",
 		},
 	}
 	for _, tt := range test {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			jwt.TimeFunc = func() time.Time {
+			jwtParserOpt := JWTParserOptions(jwt.WithTimeFunc(func() time.Time {
 				return tt.t
-			}
+			}))
 
 			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, rq *http.Request) {
 				err := json.NewEncoder(w).Encode(secondkeydata)
@@ -253,6 +253,8 @@ func TestDex_User(t *testing.T) {
 			if tt.opt != nil {
 				tt.opt(dx)
 			}
+			jwtParserOpt(dx)
+
 			rq := httptest.NewRequest(http.MethodGet, srv.URL, nil)
 			rq.Header.Add("Authorization", "Bearer "+tt.token)
 			usr, err := dx.User(rq)
@@ -291,15 +293,15 @@ func TestDex_UserWithOptions(t *testing.T) {
 		{
 			name: "token is expired",
 			t:    time.Date(2019, time.May, 10, 6, 6, 0, 0, time.UTC),
-			err:  "token is expired by 15h59m21s",
+			err:  "token has invalid claims: token is expired",
 		},
 	}
 	for _, tt := range test {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			jwt.TimeFunc = func() time.Time {
+			jwtParserOpt := JWTParserOptions(jwt.WithTimeFunc(func() time.Time {
 				return tt.t
-			}
+			}))
 
 			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, rq *http.Request) {
 				err := json.NewEncoder(w).Encode(secondkeydata)
@@ -313,6 +315,7 @@ func TestDex_UserWithOptions(t *testing.T) {
 				t.Errorf("NewDex() error = %v", err)
 				return
 			}
+			jwtParserOpt(dx)
 
 			// change Name to akim and de-prefix groups - just for this test
 			dx.With(UserExtractor(func(claims *Claims) (user *User, e error) {
