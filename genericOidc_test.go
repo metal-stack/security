@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 	"reflect"
-	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -239,7 +238,7 @@ func TestGenericOIDC_User(t *testing.T) {
 			if err == nil && tt.wantErrAtUserRegExp != nil {
 				t.Fatalf("User() error = %v, wantErr %v", err, tt.wantErrAtUserRegExp)
 			}
-			if err != nil && tt.wantErrAtUserRegExp != nil && !assert.Regexp(t, regexp.MustCompile(tt.wantErrAtUserRegExp.Error()), err.Error()) {
+			if err != nil && tt.wantErrAtUserRegExp != nil && !assert.Regexp(t, tt.wantErrAtUserRegExp.Error(), err.Error()) {
 				t.Fatalf("User() error = %v, wantErr %v", err, tt.wantErrAtUserRegExp)
 			}
 
