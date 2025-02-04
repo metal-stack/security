@@ -14,6 +14,7 @@ type User struct {
 	Name    string
 	Groups  []ResourceAccess
 	Tenant  string
+	Project string
 	Issuer  string
 	Subject string
 }
