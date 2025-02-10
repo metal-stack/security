@@ -20,7 +20,8 @@ type GenericOIDCClaims struct {
 	Name              string   `json:"name"`
 	PreferredUsername string   `json:"preferred_username"`
 	EMail             string   `json:"email"`
-	Roles             []string `json:"roles"`
+	Roles             []string `json:"roles,omitempty"`
+	Groups            []string `json:"groups,omitempty"`
 }
 
 func (g *GenericOIDCClaims) Username() string {
@@ -28,6 +29,14 @@ func (g *GenericOIDCClaims) Username() string {
 		return g.PreferredUsername
 	}
 	return g.Name
+}
+
+// Returns Roles and falls back to Groups if not set.
+func (g *GenericOIDCClaims) Memberships() []string {
+	if len(g.Roles) != 0 {
+		return g.Roles
+	}
+	return g.Groups
 }
 
 // GenericOIDC is Token Validator and UserGetter for Tokens issued by generic OIDC-Providers.
@@ -154,7 +163,7 @@ func DefaultGenericUserExtractor(ic *IssuerConfig, claims *GenericOIDCClaims) (*
 		return nil, errors.New("claims is nil")
 	}
 	var grps []ResourceAccess
-	for _, g := range claims.Roles {
+	for _, g := range claims.Memberships() {
 		grps = append(grps, ResourceAccess(g))
 	}
 
