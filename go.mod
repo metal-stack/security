@@ -6,7 +6,7 @@ require (
 	github.com/coreos/go-oidc/v3 v3.12.0
 	github.com/go-jose/go-jose/v4 v4.0.4
 	github.com/go-openapi/runtime v0.28.0
-	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
