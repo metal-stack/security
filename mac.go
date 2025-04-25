@@ -190,7 +190,7 @@ func (hma *HMACAuth) UserFromRequestData(requestData RequestData) (*User, error)
 	}
 	if hma.Lifetime > 0 {
 		if time.Since(ts) > hma.Lifetime {
-			return nil, fmt.Errorf("the timestamp in your header is too old: %q", t)
+			return nil, fmt.Errorf("the timestamp in your header is too old: %q, please check if you have time synchronization activated", t)
 		}
 	}
 

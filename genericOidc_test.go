@@ -177,7 +177,7 @@ func TestGenericOIDC_User(t *testing.T) {
 				},
 			},
 			want:                nil,
-			wantErrAtUserRegExp: errors.New("oidc: malformed jwt: go-jose/go-jose: unexpected signature algorithm \"ES256\"; expected \\[\"RS256\" \"RS384\" \"RS512\"\\]"),
+			wantErrAtUserRegExp: errors.New("oidc: malformed jwt: unexpected signature algorithm \"ES256\"; expected \\[\"RS256\" \"RS384\" \"RS512\"\\]"),
 		},
 		{
 			name: "Test timeout",
