@@ -29,7 +29,7 @@ type userFn func(issuerUrl string) *User
 func TestIssuerResolver_User(t *testing.T) {
 
 	// Ensure we are safe for different locations of issuer and enforcing infrastructure
-	os.Setenv("TZ", "UTC")
+	_ = os.Setenv("TZ", "UTC")
 
 	type fields struct {
 		userExtractorFn GenericUserExtractorFn

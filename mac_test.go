@@ -54,7 +54,7 @@ func ExampleHMACAuth() {
 	fmt.Println(hm.Lifetime)
 	fmt.Println(hm.Type)
 	// the key is not accessible
-	fmt.Println(hm.key)
+	fmt.Println(hm.key) // nolint:staticcheck
 	// Output:
 	// Bicycle Repair Man
 	// 10s
