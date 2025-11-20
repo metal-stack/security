@@ -1,6 +1,6 @@
 module github.com/metal-stack/security
 
-go 1.24
+go 1.24.0
 
 toolchain go1.24.2
 
@@ -14,8 +14,8 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/lestrrat-go/jwx/v2 v2.1.5
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/crypto v0.37.0
-	golang.org/x/net v0.39.0
+	golang.org/x/crypto v0.45.0
+	golang.org/x/net v0.47.0
 	golang.org/x/oauth2 v0.29.0
 )
 
@@ -41,6 +41,6 @@ require (
 	github.com/segmentio/asm v1.2.0 // indirect
 	go.mongodb.org/mongo-driver v1.17.3 // indirect
 	golang.org/x/sync v0.13.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
