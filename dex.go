@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/lestrrat-go/jwx/v2/jwk"
+	"github.com/lestrrat-go/jwx/v3/jwk"
 )
 
 const (
@@ -187,7 +187,7 @@ func (dx *Dex) searchKey(kid string) (any, error) {
 			continue
 		}
 		var key any
-		err = jwtkey.Raw(&key)
+		err = jwk.Export(jwtkey, &key)
 		return key, err
 	}
 	return nil, fmt.Errorf("key %q not found", kid)

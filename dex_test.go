@@ -1,14 +1,12 @@
 package security
 
 import (
-	"context"
 	"crypto/rsa"
 	"encoding/base64"
 	"math/big"
 	"strings"
 	"testing"
 
-	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/stretchr/testify/require"
@@ -134,11 +132,16 @@ func TestDex_keyfetcher(t *testing.T) {
 			return
 		}
 
-		for it := keys.Keys(context.Background()); it.Next(context.Background()); {
-			pair := it.Pair()
-			key := pair.Value.(jwk.Key)
+		for i := 0; i < keys.Len(); i++ {
+			key, ok := keys.Key(i)
+			if !ok {
+				t.Errorf("failed to get key at index %d", i)
+			}
 
-			keyID := key.KeyID()
+			keyID, ok := key.KeyID()
+			if !ok {
+				t.Errorf("failed to get keyid at index %d", i)
+			}
 			require.NotEmpty(t, keyID)
 		}
 
