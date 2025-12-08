@@ -132,7 +132,7 @@ func TestDex_keyfetcher(t *testing.T) {
 			return
 		}
 
-		for i := 0; i < keys.Len(); i++ {
+		for i := range keys.Len() {
 			key, ok := keys.Key(i)
 			if !ok {
 				t.Errorf("failed to get key at index %d", i)
