@@ -1,11 +1,11 @@
 package security
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
 	"github.com/go-openapi/runtime"
-	"golang.org/x/net/context"
 )
 
 // A User is the current user who is executing a rest function.
