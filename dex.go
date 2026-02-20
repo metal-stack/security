@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 	"time"
 
@@ -109,12 +110,7 @@ func JWTParserOptions(opt jwt.ParserOption) Option {
 }
 
 func (dx *Dex) algorithmSupported(alg string) bool {
-	for _, a := range dx.algorithmWhitelist {
-		if a == alg {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(dx.algorithmWhitelist, alg)
 }
 
 // the keyfetcher fetches the keys from the remote dex at a regular interval.
@@ -176,7 +172,7 @@ func (dx *Dex) updateKeys(old jwk.Set) (jwk.Set, error) {
 // searchKey searches the given key in the set loaded from dex. If
 // there is a key it will be returned otherwise an error is returned
 func (dx *Dex) searchKey(kid string) (any, error) {
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		keys, err := dx.fetchKeys()
 		if err != nil {
 			return nil, err
