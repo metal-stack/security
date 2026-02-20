@@ -203,7 +203,6 @@ func TestGenericOIDC_User(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 
 			tc := tt.args.tokenCfg

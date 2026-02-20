@@ -20,7 +20,6 @@ func TestCreateTokenAndKeys(t *testing.T) {
 	}
 
 	for _, alg := range algs {
-		alg := alg
 		t.Run(string(alg), func(t *testing.T) {
 
 			clientID := "myClient"

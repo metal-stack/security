@@ -132,7 +132,7 @@ func TestIssuerResolver_User(t *testing.T) {
 			fields: fields{
 				userExtractorFn: DefaultGenericUserExtractor,
 				tokenFn:         MustCreateTokenAndKeys,
-				clientId:        str2p("metal-stack"),
+				clientId:        new("metal-stack"),
 			},
 			args: args{
 				tokenCfg: func() *TokenCfg {
@@ -153,7 +153,7 @@ func TestIssuerResolver_User(t *testing.T) {
 			fields: fields{
 				userExtractorFn: DefaultGenericUserExtractor,
 				tokenFn:         MustCreateTokenAndKeys,
-				clientId:        str2p("metal-stack"),
+				clientId:        new("metal-stack"),
 			},
 			args: args{
 				tokenCfg: func() *TokenCfg {
@@ -181,7 +181,6 @@ func TestIssuerResolver_User(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 
 			var srv *httptest.Server
@@ -240,10 +239,6 @@ func TestIssuerResolver_User(t *testing.T) {
 			}
 		})
 	}
-}
-
-func str2p(s string) *string {
-	return &s
 }
 
 func TestMultiIssuerCache_reload(t *testing.T) {
@@ -465,7 +460,6 @@ func TestMultiIssuerCache_syncCache(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 
 			i, err := NewMultiIssuerCache(slog.New(slog.NewJSONHandler(os.Stdout, nil)), tt.fields.ilp, tt.fields.ugp)

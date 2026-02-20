@@ -173,7 +173,6 @@ func TestHMACAuth_User(t *testing.T) {
 	}
 
 	for _, st := range testdata {
-		st := st
 		t.Run(st.name, func(t *testing.T) {
 			hm := NewHMACAuth(
 				authtype,
@@ -267,7 +266,6 @@ func TestMacCalc2(t *testing.T) {
 		},
 	}
 	for _, td := range testdata {
-		td := td
 		t.Run(td.name, func(t *testing.T) {
 			u := User{Name: td.user}
 			hm := NewHMACAuth(td.user, []byte(td.hmac), WithUser(u))

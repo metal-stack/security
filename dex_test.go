@@ -235,7 +235,6 @@ func TestDex_User(t *testing.T) {
 		},
 	}
 	for _, tt := range test {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			jwtParserOpt := JWTParserOptions(jwt.WithTimeFunc(func() time.Time {
 				return tt.t
@@ -300,7 +299,6 @@ func TestDex_UserWithOptions(t *testing.T) {
 		},
 	}
 	for _, tt := range test {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			jwtParserOpt := JWTParserOptions(jwt.WithTimeFunc(func() time.Time {
 				return tt.t
